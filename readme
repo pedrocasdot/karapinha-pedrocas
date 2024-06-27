@@ -1,0 +1,16 @@
+
+Instruções para executar a aplicação:
+
+primeiro deve rodar o backend:
+	-cd backend
+	-gerar a migracao para poder atualizar o banco de dados
+
+rodar o backend com o seguinte comando: dotnet watch run
+
+
+
+para rodar o fronted:
+	-cd frontend
+	-npm install
+	-npm run dev
+

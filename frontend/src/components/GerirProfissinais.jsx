@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import DatePicker from 'react-datepicker';
-import Modal  from 'react-modal'
+import Modal from 'react-modal'
 import 'react-datepicker/dist/react-datepicker.css';
 import { registerLocale, setDefaultLocale } from 'react-datepicker';
 import pt from 'date-fns/locale/pt';
-import { getAllCategories, getAllProfessionals, registerProfissinal, deleteProfissional } from '../services/apiService';
+import { getAllCategories, getAllProfessionals, registerProfissinal, deleteProfissional, getProfissinalHorarioById } from '../services/apiService';
 import { customStyles } from '../services/custom';
 // Register Portuguese locale
 registerLocale('pt', pt);
@@ -22,7 +22,6 @@ const GerirProfissionais = () => {
   const [schedules, setSchedules] = useState([null]);
   const [professionals, setProfessionals] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [readOnlyDates, setReadOnlyDates] = useState(true);
 
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -97,7 +96,7 @@ const GerirProfissionais = () => {
     };
 
     try {
-      const createdProfessional = await registerProfissinal(newProfessional);
+      await registerProfissinal(newProfessional);
       const prof = {
         nome: name,
         categoryId: newProfessional.categoryId,
@@ -105,7 +104,7 @@ const GerirProfissionais = () => {
         telemovel: phone,
         bi: idCard,
       };
-      
+
       setProfessionals([...professionals, prof]);
 
       setName('');
@@ -117,7 +116,7 @@ const GerirProfissionais = () => {
     } catch (error) {
       console.error('Erro ao adicionar profissional:', error);
     }
-  };  
+  };
 
   const handleDeleteProfessional = async (id) => {
     try {
@@ -126,11 +125,11 @@ const GerirProfissionais = () => {
       setProfessionals(updatedProfessionals);
       setModalMessage("Profissional foi deletado com sucesso!");
       setModalIsOpen(true);
-      setTimeout(()=> setModalIsOpen(false), 3000);
+      setTimeout(() => setModalIsOpen(false), 3000);
     } catch (error) {
       setModalMessage("Não foi possível deletar o profissional o profissional");
       setModalIsOpen(true);
-      setTimeout(()=> setModalIsOpen(false), 3000);
+      setTimeout(() => setModalIsOpen(false), 3000);
       console.error('Erro ao deletar profissional:', error);
     }
   };
@@ -165,7 +164,6 @@ const GerirProfissionais = () => {
                   <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Categoria</th>
                   <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Email</th>
                   <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Telemóvel</th>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Horários</th>
                   <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Ações</th>
                 </tr>
               </thead>
@@ -173,11 +171,17 @@ const GerirProfissionais = () => {
                 {professionals.map((professional, index) => (
                   <tr key={index}>
                     <td className="px-8 py-4 whitespace-nowrap">{professional.nome}</td>
-                    <td className="px-8 py-4 whitespace-nowrap">{professional.categoryId}</td>
+                    <td className="px-8 py-4 whitespace-nowrap">{professional.category.name}</td>
                     <td className="px-8 py-4 whitespace-nowrap">{professional.email}</td>
                     <td className="px-8 py-4 whitespace-nowrap">{professional.telemovel}</td>
-                    {/* <td className="px-8 py-4 whitespace-nowrap">{professional.horarios.join(', ')}</td> */}
                     <td className="px-8 py-4 whitespace-nowrap">
+
+                      <button
+                        onClick={() => handleDeleteProfessional(professional.id)}
+                        className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
+                      >
+                        Ver Horário
+                      </button>
                       <button
                         onClick={() => handleDeleteProfessional(professional.id)}
                         className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"

@@ -36,7 +36,7 @@ namespace backend.Controllers
         }
 
         [HttpGet("profissional/{profissionalId}")]
-        public async Task<ActionResult<IEnumerable<ProfissionalHorarioDTO>>> GetProfissionalHorariosByProfissionalId(int profissionalId)
+        public async Task<ActionResult<IEnumerable<string>>> GetProfissionalHorariosByProfissionalId(int profissionalId)
         {
             var profissionalHorarios = await _profissionalHorarioService.GetProfissionalHorariosAsync(profissionalId);
             return Ok(profissionalHorarios);

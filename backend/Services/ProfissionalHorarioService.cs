@@ -1,4 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using backend.DAL.Repositories;
 using backend.DTO;
 using backend.Model;
@@ -10,32 +12,22 @@ namespace backend.Services
     public class ProfissionalHorarioService : IProfissionalHorarioService
     {
         private readonly IProfissionalHorarioRepository _repository;
-        private readonly IProfissionalsRepository _repositoryProfissional;
+        private readonly IProfissionalService _serviceProfissional;
 
-        public ProfissionalHorarioService(IProfissionalHorarioRepository repository, IProfissionalsRepository repositoryPro)
+        public ProfissionalHorarioService(IProfissionalHorarioRepository repository, IProfissionalService serviceProfissional)
         {
             _repository = repository;
-            _repositoryProfissional = repositoryPro;
+            _serviceProfissional = serviceProfissional;
         }
-        private ProfissionalDTO toProfissionalDTO(Profissional? profissional){
-            return new ProfissionalDTO{
-                Id = profissional.Id,
-                Nome = profissional.Nome,
-                BI = profissional.BI,
-                CategoryId = profissional.CategoryId,
-                Email = profissional.Email,
-                Telemovel = profissional.Telemovel,
-            };
-        }
+
         public async Task<IEnumerable<ProfissionalHorarioDTO>> GetAllProfissionalHorariosAsync()
         {
             var profissionalHorarios = await _repository.GetAllProfissionalHorariosAsync();
-            var profisionais = await _repositoryProfissional.GetAllProfissionalsAsync();
             return profissionalHorarios.Select(ph => new ProfissionalHorarioDTO
             {
                 Id = ph.Id,
                 ProfissionalId = ph.ProfissionalId,
-                profissional =  toProfissionalDTO(profisionais.ToList().Find(p => p.Id == ph.ProfissionalId)),
+                profissional = _serviceProfissional.GetProfissionalByIdAsync((int)ph.ProfissionalId).Result,
                 horario = ph.horario
             });
         }
@@ -43,7 +35,6 @@ namespace backend.Services
         public async Task<ProfissionalHorarioDTO?> GetProfissionalHorariosByIdAsync(int id)
         {
             var profissionalHorario = await _repository.GetProfissionalHorariosByIdAsync(id);
-            var profisionais = await _repositoryProfissional.GetAllProfissionalsAsync();
             if (profissionalHorario == null)
                 return null;
 
@@ -51,34 +42,25 @@ namespace backend.Services
             {
                 Id = profissionalHorario.Id,
                 ProfissionalId = profissionalHorario.ProfissionalId,
-                profissional = toProfissionalDTO(profisionais.ToList().Find(p => p.Id == profissionalHorario.ProfissionalId)),
+                profissional = _serviceProfissional.GetProfissionalByIdAsync((int)profissionalHorario.ProfissionalId).Result,
                 horario = profissionalHorario.horario
             };
         }
 
-        public async Task<IEnumerable<ProfissionalHorarioDTO>> GetProfissionalHorariosAsync(int profissionalId){
+        public async Task<IEnumerable<string>> GetProfissionalHorariosAsync(int profissionalId)
+        {
             var profissionalHorarios = await _repository.GetProfissionalsHorarioByIdAsync(profissionalId);
-            var profissionalM = await _repositoryProfissional.GetProfissionalByIdAsync(profissionalId);
-            return profissionalHorarios.Select(ph => new ProfissionalHorarioDTO
-            {
-                Id = ph.Id,
-                 ProfissionalId = ph.ProfissionalId,
-                profissional = new ProfissionalDTO{
-                    Id = profissionalM.Id,
-                    BI = profissionalM.BI,
-                    CategoryId = profissionalM.CategoryId,
-                    Email = profissionalM.Email,
-                    Nome = profissionalM.Nome,
-                    Telemovel = profissionalM.Telemovel,
-                },
-                horario = ph.horario
-            });
+            return profissionalHorarios.Select(ph => ph.horario).ToList();
         }
 
         public async Task CreateProfissionalHorarioAsync(ProfissionalHorarioDTO profissionalHorarioDTO)
         {
             if (profissionalHorarioDTO == null)
                 throw new ArgumentNullException(nameof(profissionalHorarioDTO), "ProfissionalHorarioDTO cannot be null.");
+
+            if (!Regex.IsMatch(profissionalHorarioDTO.horario, @"^(09:00|09:30|10:00|10:30|11:00|11:30|12:00|12:30|13:00|13:30|14:00|14:30|15:00|15:30|16:00|16:30|17:00|17:30|18:00|18:30|19:00|19:30)$"))
+                throw new ValidationException("O horário deve estar no formato HH:mm e entre 09:00 e 19:30, com minutos apenas em 00 ou 30.");
+
 
             var entity = new ProfissionalHorario
             {

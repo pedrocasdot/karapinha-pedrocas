@@ -9,10 +9,12 @@ namespace backend.Services
     public class ServicoService : IServicoService
     {
         private readonly IServicesRepository _serviceRepository;
+        private readonly ICategoryService _categoryService;
 
-        public ServicoService(IServicesRepository serviceRepository)
+        public ServicoService(IServicesRepository serviceRepository, ICategoryService categoryService)
         {
             _serviceRepository = serviceRepository;
+            _categoryService = categoryService;
         }
 
         public async Task<IEnumerable<ServiceDTO>> GetAllServicesAsync()
@@ -24,6 +26,7 @@ namespace backend.Services
                 Id = s.Id,
                 ServiceName = s.ServiceName,
                 CategoryId = s.CategoryId,
+                Category = _categoryService.GetCategoryByIdAsync((int)s.CategoryId).Result,
                 Status = s.Status,
                 Price = s.Price
             });
@@ -40,6 +43,7 @@ namespace backend.Services
                 Id = service.Id,
                 ServiceName = service.ServiceName,
                 CategoryId = service.CategoryId,
+                Category = _categoryService.GetCategoryByIdAsync((int)service.CategoryId).Result,
                 Status = service.Status,
                 Price = service.Price
             };

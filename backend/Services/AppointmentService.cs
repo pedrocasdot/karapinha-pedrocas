@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using backend.DAL.Repositories;
 using backend.DTO;
 using backend.Model;
@@ -12,7 +15,7 @@ namespace backend.Services
         private readonly IServicoService _servicesService;
         private readonly IProfissionalService _profissionalService;
         private readonly IUserService _userService;
-    
+
         public AppointmentService(IAppointmentsRepository appointmentRepository, IServicoService servicesRepository, IProfissionalService profissionalsRepository, IUserService usersRepository)
         {
             _appointmentRepository = appointmentRepository;
@@ -63,9 +66,29 @@ namespace backend.Services
 
         public async Task CreateAppointmentAsync(AppointmentDTO appointment)
         {
+            if (appointment == null)
+                throw new ArgumentNullException(nameof(appointment), "AppointmentDTO cannot be null.");
+                
+            if (!Regex.IsMatch(appointment.Time, @"^(09:00|09:30|10:00|10:30|11:00|11:30|12:00|12:30|13:00|13:30|14:00|14:30|15:00|15:30|16:00|16:30|17:00|17:30|18:00|18:30|19:00|19:30)$"))
+                throw new ValidationException("O horário deve estar no formato HH:mm e entre 09:00 e 19:30, com minutos apenas em 00 ou 30.");
+
+
+            if (!DateTime.TryParseExact(appointment.AppointmentDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime appointmentDate))
+                throw new ValidationException("A data do agendamento deve estar no formato 'yyyy-MM-dd'.");
+
+            if (!TimeSpan.TryParseExact(appointment.Time, "hh\\:mm", CultureInfo.InvariantCulture, out TimeSpan appointmentTime))
+                throw new ValidationException("A hora do agendamento deve estar no formato 'hh:mm'.");
+
+            // Validação da data
+            if (appointmentDate.Date < DateTime.Today)
+                throw new ValidationException("A data do agendamento não pode ser um dia passado.");
+
+            // Validação da hora se for hoje
+            if (appointmentDate.Date == DateTime.Today && appointmentTime < DateTime.Now.TimeOfDay)
+                throw new ValidationException("A hora do agendamento não pode ser uma hora passada.");
+
             var entity = new Appointment
             {
-                
                 Time = appointment.Time,
                 ServiceId = appointment.ServiceId,
                 UserId = appointment.UserId,
@@ -83,7 +106,7 @@ namespace backend.Services
             if (entity == null)
                 return;
 
-            
+
             entity.AppointmentDate = appointment.AppointmentDate;
             entity.ServiceId = appointment.ServiceId;
             entity.UserId = appointment.UserId;

@@ -11,7 +11,7 @@ namespace backend.Shared.Services
         Task<IEnumerable<ProfissionalHorarioDTO>> GetAllProfissionalHorariosAsync();
         Task<ProfissionalHorarioDTO> GetProfissionalHorariosByIdAsync(int id);
 
-        Task<IEnumerable<ProfissionalHorarioDTO>> GetProfissionalHorariosAsync(int profissionalId);
+        Task<IEnumerable<string>> GetProfissionalHorariosAsync(int profissionalId);
 
         Task CreateProfissionalHorarioAsync(ProfissionalHorarioDTO user);
         Task UpdateProfissionalHorarioAsync(ProfissionalHorarioDTO user);

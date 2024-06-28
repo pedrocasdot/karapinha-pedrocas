@@ -12,8 +12,10 @@ namespace backend.DTO
         public string? Nome { get; set; }
         
         public int? CategoryId { get; set; }
+        public CategoryDTO? Category { get; set; }
         public string? Telemovel {get; set;}
         public string? BI {get; set;}
         public string? Email { get; set; }
+        // public List<string>? horarios{ get; set; } = [];
     }
 }

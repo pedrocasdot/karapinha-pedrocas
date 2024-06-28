@@ -12,6 +12,7 @@ namespace backend.Services
     public class CategoryService : ICategoryService
     {
          private readonly ICategoriesRepository _categoryRepository;
+         
 
         public CategoryService(ICategoriesRepository categoryRepository)
         {

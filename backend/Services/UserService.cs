@@ -121,16 +121,16 @@ namespace backend.Services
             if (entity == null)
                 return;
 
-            entity.NomeCompleto = user.NomeCompleto;
-            entity.EnderecoEmail = user.EnderecoEmail;
+            entity.NomeCompleto = user.NomeCompleto ?? entity.NomeCompleto;
+            entity.EnderecoEmail = user.EnderecoEmail ?? entity.NomeCompleto;
             if (!string.IsNullOrEmpty(user.Password))
 			{
  	   			entity.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
 			}
-            entity.Telemovel = user.Telemovel;
-            entity.Username = user.Username;
-            entity.BI = user.BI;
-            entity.Status = user.Status;
+            entity.Telemovel = user.Telemovel ?? entity.Telemovel;
+            entity.Username = user.Username ?? entity.Username;
+            entity.BI = user.BI ?? entity.BI;
+            entity.Status = user.Status ?? entity.Status;
             await _userRepository.UpdateUserAsync(entity);
         }
 

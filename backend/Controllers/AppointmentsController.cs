@@ -41,6 +41,7 @@ namespace backend.Controllers
         public async Task<ActionResult> CreateAppointment(AppointmentDTO appointment)
         {
             await _appointmentService.CreateAppointmentAsync(appointment);
+            
             return CreatedAtAction(nameof(GetAppointment), new { id = appointment.Id }, appointment);
         }
 

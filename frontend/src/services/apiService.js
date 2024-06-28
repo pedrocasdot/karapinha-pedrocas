@@ -206,6 +206,8 @@ export const sendEmail = (user) => {
 
 }
 
+
+
 export const registerAppointment = async (dados) => {
   try {
     const response = await axios.post(`${API_URL}/appointments`, dados, {
@@ -246,6 +248,35 @@ export const registerProfissinal = async (userData) => {
       },
     });
 
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.response.data);
+  }
+};
+
+export const registerProfissinalHorario = async (userData) => {
+  try {
+    const response = await axios.post(`${API_URL}/profissionalHorarios`, userData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.response.data);
+  }
+};
+
+export const getProfissinalHorarioById = async (idProfissional) => {
+  try {
+    const response = await axios.get(`${API_URL}/profissionalHorarios/profissional/${idProfissional}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     return response.data;
   } catch (error) {
     console.error(error);
@@ -340,3 +371,5 @@ export const login = async (username, password) => {
     throw new Error('Falha ao fazer login');
   }
 };
+
+

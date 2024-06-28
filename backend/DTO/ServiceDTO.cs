@@ -8,10 +8,9 @@ namespace backend.DTO
 
         public string? ServiceName { get; set; }
 
-        // public Category Category {get; set;}
+        public CategoryDTO? Category {get; set;}
         public int? CategoryId { get; set; }  
         public bool? Status { get; set; } = false;
-
 
         public decimal? Price { get; set; }
     }

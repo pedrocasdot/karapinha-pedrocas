@@ -11,12 +11,15 @@ namespace backend.Services
     public class ProfissionalService : IProfissionalService
     {
         private readonly IProfissionalsRepository _profissionalsRepository;
+         private readonly ICategoryService _categoryService;
 
-        public ProfissionalService(IProfissionalsRepository profissionalsRepository)
+
+        public ProfissionalService(IProfissionalsRepository profissionalsRepository, ICategoryService categoryService)
         {
             _profissionalsRepository = profissionalsRepository;
+            _categoryService = categoryService;
         }
-
+       
         public async Task<IEnumerable<ProfissionalDTO>> GetAllProfissionalsAsync()
         {
             var profissionals = await _profissionalsRepository.GetAllProfissionalsAsync();
@@ -26,6 +29,11 @@ namespace backend.Services
                 Nome = p.Nome,
                 Telemovel = p.Telemovel,
                 CategoryId = p.CategoryId,
+                Category = _categoryService.GetCategoryByIdAsync((int)p.CategoryId).Result,
+                // horarios = _profissionalHorarioService.GetProfissionalHorariosAsync( p.Id)
+                //                         .Result
+                //                         .Select(ph => ph.horario)
+                //                         .ToList(),
                 BI = p.BI,
                 Email = p.Email,
             });
@@ -43,7 +51,7 @@ namespace backend.Services
                 Nome = profissional.Nome,
                 Telemovel = profissional.Telemovel,
                 CategoryId = profissional.CategoryId,
-
+                Category = _categoryService.GetCategoryByIdAsync((int)profissional.CategoryId).Result,
                 BI = profissional.BI,
                 Email = profissional.Email,
             };

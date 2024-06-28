@@ -68,15 +68,11 @@ const UserProfileForm = () => {
       try {
         console.log(user);
 
-
         Object.keys(userData).forEach(key => {
-          if (userData[key] === null || userData[key] === undefined) {
-            userData[key] = user[key]
+          if (userData[key] === '' || userData[key] === null || userData[key] === undefined) {
+              userData[key] = user[key]
           }
         });
-
-        // setUser(userData);
-        console.log(userData);
         await updateUser(userData);
         setModalMessage('Dados atualizados com sucesso');
         setModalIsOpen(true);

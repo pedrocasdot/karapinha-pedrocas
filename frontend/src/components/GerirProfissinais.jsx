@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import DatePicker from 'react-datepicker';
-import Modal from 'react-modal'
+import Modal from 'react-modal';
 import 'react-datepicker/dist/react-datepicker.css';
 import { registerLocale, setDefaultLocale } from 'react-datepicker';
 import pt from 'date-fns/locale/pt';
 import { getAllCategories, getAllProfessionals, registerProfissinal, deleteProfissional, getProfissinalHorarioById } from '../services/apiService';
 import { customStyles } from '../services/custom';
-// Register Portuguese locale
+
 registerLocale('pt', pt);
 setDefaultLocale('pt');
-
 
 Modal.setAppElement('#root');
 
@@ -22,10 +21,9 @@ const GerirProfissionais = () => {
   const [schedules, setSchedules] = useState([null]);
   const [professionals, setProfessionals] = useState([]);
   const [categories, setCategories] = useState([]);
-
-
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+  const [selectedProfessionalSchedules, setSelectedProfessionalSchedules] = useState([]);
 
   const handleNameChange = (e) => {
     setName(e.target.value);
@@ -134,6 +132,20 @@ const GerirProfissionais = () => {
     }
   };
 
+  const handleViewSchedules = async (professionalId) => {
+    try {
+      const schedulesFromApi = await getProfissinalHorarioById(professionalId);
+      console.log(schedulesFromApi);
+      setSelectedProfessionalSchedules(schedulesFromApi);
+      setModalMessage('');
+      setModalIsOpen(true);
+    } catch (error) {
+      console.error('Erro ao buscar horários:', error);
+      setModalMessage('Erro ao buscar horários do profissional.');
+      setModalIsOpen(true);
+    }
+  };
+
   const startTime = new Date();
   startTime.setHours(9, 0, 0); // Define 09:00 como horário inicial
 
@@ -175,9 +187,8 @@ const GerirProfissionais = () => {
                     <td className="px-8 py-4 whitespace-nowrap">{professional.email}</td>
                     <td className="px-8 py-4 whitespace-nowrap">{professional.telemovel}</td>
                     <td className="px-8 py-4 whitespace-nowrap">
-
                       <button
-                        onClick={() => handleDeleteProfessional(professional.id)}
+                        onClick={() => handleViewSchedules(professional.id)}
                         className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
                       >
                         Ver Horário
@@ -199,7 +210,6 @@ const GerirProfissionais = () => {
               </tbody>
             </table>
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <form>
@@ -312,7 +322,23 @@ const GerirProfissionais = () => {
           style={customStyles}
           contentLabel="Mensagem do Sistema"
         >
-          <div>{modalMessage}</div>
+          <div >
+            {modalMessage ? (
+              <div>{modalMessage}</div>
+            ) : (
+              <div>
+                <h2>Horários do Profissional</h2>
+                <ul>
+                  {selectedProfessionalSchedules.length ?  selectedProfessionalSchedules.map((schedule, index) => (
+
+                    <li key={index}>
+                      {schedule}
+                    </li>
+                  )): <h3>Novato/NA</h3>}
+                </ul>
+              </div>
+            )}
+          </div>
         </Modal>
       </div>
     </div>

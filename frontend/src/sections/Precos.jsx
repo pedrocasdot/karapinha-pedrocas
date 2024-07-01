@@ -37,6 +37,7 @@ const Pricing = () => {
           <CardPreco
             key={service.id}
             descricao={service.serviceName}
+            categoria = {service.category.name}
             preco={service.price}
           />
         ))}

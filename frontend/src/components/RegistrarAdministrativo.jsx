@@ -1,13 +1,10 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { UserContext } from '../services/UserContext'; // Importa o UserContext
-import {  registerUser, sendEmail} from '../services/apiService';
-import Modal from 'react-modal'
+import Modal from 'react-modal';
+import { registerUser, sendEmail } from '../services/apiService';
 import { customStyles } from '../services/custom';
 
-
 Modal.setAppElement('#root');
-
 
 const RegistrarAdministrativo = () => {
   const [formData, setFormData] = useState({
@@ -21,13 +18,11 @@ const RegistrarAdministrativo = () => {
     enderecoEmail: '',
     status: false,
     tipoUsuario: 2,
-
   });
   const [errors, setErrors] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
-  const [showPassword, setShowPassword] = useState(false); // Define showPassword state
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Define showConfirmPassword state
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
 
@@ -42,7 +37,7 @@ const RegistrarAdministrativo = () => {
     }
     setFormData({
       ...formData,
-      [name]: files ? files[0] : value
+      [name]: files ? files[0] : value,
     });
   };
 
@@ -65,13 +60,10 @@ const RegistrarAdministrativo = () => {
       setErrors(formErrors);
       setTimeout(() => setErrors({}), 3000);
     } else {
-      let userData = {
-        ...formData,
-      };
+      let userData = { ...formData };
       delete userData.confirmPassword;
       try {
         const response = await registerUser(userData);
-
         setModalMessage('A conta do administrativo foi registrada com sucesso!');
         setModalIsOpen(true);
         setTimeout(() => setModalIsOpen(false), 3000);
@@ -81,168 +73,169 @@ const RegistrarAdministrativo = () => {
         setModalMessage('Erro ao criar a conta, por favor tente novamente');
         setModalIsOpen(true);
         setTimeout(() => setModalIsOpen(false), 3000);
-        
       }
     }
   };
 
   return (
-    <div className="container flex justify-center items-center min-h-screen">
-
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-
-        {previewImage && (
-          <div className="col-span-1 md:col-span-2 flex justify-center">
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="max-h-48 w-48 rounded-full object-cover mb-4"
-            />
-          </div>
-        )}
-        <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Nome Completo</label>
-          <input
-            type="text"
-            name="nomeCompleto"
-            value={formData.nomeCompleto}
-            onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder="Nome Completo"
-          />
-          {errors.nomeCompleto && <p className="text-red-500 text-xs italic">{errors.nomeCompleto}</p>}
-        </div>
-        <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Endereço de Email</label>
-          <input
-            type="email"
-            name="enderecoEmail"
-            value={formData.enderecoEmail}
-            onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder="Email"
-          />
-          {errors.enderecoEmail && <p className="text-red-500 text-xs italic">{errors.enderecoEmail}</p>}
-        </div>
-        <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Telemóvel</label>
-          <input
-            type="text"
-            name="telemovel"
-            value={formData.telemovel}
-            onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder="Telemóvel"
-          />
-          {errors.telemovel && <p className="text-red-500 text-xs italic">{errors.telemovel}</p>}
-        </div>
-        <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Foto</label>
-          <input
-            type="file"
-            name="foto"
-            onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
-          />
-          {errors.foto && <p className="text-red-500 text-xs italic">{errors.foto}</p>}
-        </div>
-        <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Bilhete de Identidade</label>
-          <input
-            type="text"
-            name="bi"
-            value={formData.bi}
-            onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder="Bilhete de Identidade"
-          />
-          {errors.bi && <p className="text-red-500 text-xs italic">{errors.bi}</p>}
-        </div>
-        <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Username</label>
-          <input
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder="Username"
-          />
-          {errors.username && <p className="text-red-500 text-xs italic">{errors.username}</p>}
-        </div>
-        <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Password</label>
-          <div className="relative">
+    <div className="min-h-screen flex flex-col justify-start items-center  py-6">
+      <div className="w-[100%]  bg-white rounded-lg shadow-lg p-6">
+        <h1 className="text-2xl font-bold text-center mb-4 text-custombrown">Registrar Administrativo</h1>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+          {previewImage && (
+            <div className="col-span-1 md:col-span-2 flex justify-center">
+              <img
+                src={previewImage}
+                alt="Preview"
+                className="max-h-48 w-48 rounded-full object-cover mb-4"
+              />
+            </div>
+          )}
+          <div className="w-full">
+            <label className="block text-custombrown text-sm font-bold mb-2">Nome Completo</label>
             <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              value={formData.password}
+              type="text"
+              name="nomeCompleto"
+              value={formData.nomeCompleto}
               onChange={handleChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="Password"
+              placeholder="Nome Completo"
             />
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
-              {showPassword ? (
-                <FiEyeOff
-                  className="text-gray-700 cursor-pointer"
-                  onClick={() => setShowPassword(!showPassword)}
-                />
-              ) : (
-                <FiEye
-                  className="text-gray-700 cursor-pointer"
-                  onClick={() => setShowPassword(!showPassword)}
-                />
-              )}
-            </div>
+            {errors.nomeCompleto && <p className="text-red-500 text-xs italic">{errors.nomeCompleto}</p>}
           </div>
-          {errors.password && <p className="text-red-500 text-xs italic">{errors.password}</p>}
-        </div>
-        <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Confirmação da Password</label>
-          <div className="relative">
+          <div className="w-full">
+            <label className="block text-custombrown text-sm font-bold mb-2">Endereço de Email</label>
             <input
-              type={showConfirmPassword ? "text" : "password"}
-              name="confirmPassword"
-              value={formData.confirmPassword}
+              type="email"
+              name="enderecoEmail"
+              value={formData.enderecoEmail}
               onChange={handleChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              placeholder="Confirmação da Password"
+              placeholder="Email"
             />
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
-              {showConfirmPassword ? (
-                <FiEyeOff
-                  className="text-gray-700 cursor-pointer"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                />
-              ) : (
-                <FiEye
-                  className="text-gray-700 cursor-pointer"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                />
-              )}
-            </div>
+            {errors.enderecoEmail && <p className="text-red-500 text-xs italic">{errors.enderecoEmail}</p>}
           </div>
-          {errors.confirmPassword && <p className="text-red-500 text-xs italic">{errors.confirmPassword}</p>}
-        </div>
-        <div className="col-span-2 flex items-center justify-center">
-          <button
-            type="submit"
-            className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            Cadastrar
-          </button>
-        </div>
-      </form>
-      <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={() => setModalIsOpen(false)}
-        style={customStyles}
-        contentLabel="Mensagem do Sistema"
-      >
-        <div>{modalMessage}</div>
-      </Modal>
+          <div className="w-full">
+            <label className="block text-custombrown text-sm font-bold mb-2">Telemóvel</label>
+            <input
+              type="text"
+              name="telemovel"
+              value={formData.telemovel}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Telemóvel"
+            />
+            {errors.telemovel && <p className="text-red-500 text-xs italic">{errors.telemovel}</p>}
+          </div>
+          <div className="w-full">
+            <label className="block text-custombrown text-sm font-bold mb-2">Foto</label>
+            <input
+              type="file"
+              name="foto"
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+            {errors.foto && <p className="text-red-500 text-xs italic">{errors.foto}</p>}
+          </div>
+          <div className="w-full">
+            <label className="block text-custombrown text-sm font-bold mb-2">Bilhete de Identidade</label>
+            <input
+              type="text"
+              name="bi"
+              value={formData.bi}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Bilhete de Identidade"
+            />
+            {errors.bi && <p className="text-red-500 text-xs italic">{errors.bi}</p>}
+          </div>
+          <div className="w-full">
+            <label className="block text-custombrown text-sm font-bold mb-2">Username</label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              placeholder="Username"
+            />
+            {errors.username && <p className="text-red-500 text-xs italic">{errors.username}</p>}
+          </div>
+          <div className="w-full">
+            <label className="block text-custombrown text-sm font-bold mb-2">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder="Password"
+              />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+                {showPassword ? (
+                  <FiEyeOff
+                    className="text-gray-700 cursor-pointer"
+                    onClick={() => setShowPassword(!showPassword)}
+                  />
+                ) : (
+                  <FiEye
+                    className="text-gray-700 cursor-pointer"
+                    onClick={() => setShowPassword(!showPassword)}
+                  />
+                )}
+              </div>
+            </div>
+            {errors.password && <p className="text-red-500 text-xs italic">{errors.password}</p>}
+          </div>
+          <div className="w-full">
+            <label className="block text-custombrown text-sm font-bold mb-2">Confirmação da Password</label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder="Confirmação da Password"
+              />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+                {showConfirmPassword ? (
+                  <FiEyeOff
+                    className="text-gray-700 cursor-pointer"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  />
+                ) : (
+                  <FiEye
+                    className="text-gray-700 cursor-pointer"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  />
+                )}
+              </div>
+            </div>
+            {errors.confirmPassword && <p className="text-red-500 text-xs italic">{errors.confirmPassword}</p>}
+          </div>
+          <div className="col-span-2 flex items-center justify-center">
+            <button
+              type="submit"
+              className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Cadastrar
+            </button>
+          </div>
+        </form>
+        <Modal
+          isOpen={modalIsOpen}
+          onRequestClose={() => setModalIsOpen(false)}
+          style={customStyles}
+          contentLabel="Mensagem do Sistema"
+        >
+          <div>{modalMessage}</div>
+        </Modal>
+      </div>
     </div>
   );
 };
 
 export default RegistrarAdministrativo;
+

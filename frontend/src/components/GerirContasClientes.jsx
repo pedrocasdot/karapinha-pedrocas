@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getAllUsers, updateUser } from '../services/apiService'
+import { getAllUsers, updateUser } from '../services/apiService';
+
 const GerirContasClientes = () => {
   const [clients, setClients] = useState([]);
 
@@ -8,19 +9,31 @@ const GerirContasClientes = () => {
     updatedClients[index].status = true;
     try {
       const client = updatedClients[index];
-      console.log(client);
       await updateUser(client);
       setClients(updatedClients);
     } catch (error) {
       console.log("Erro ao atualizar os dados: ", error);
     }
   };
+
+  const handleBlockClient = async (index) => {
+    const updatedClients = [...clients];
+    updatedClients[index].status = false;
+    console.log(updatedClients[index]);
+    try {
+      const client = updatedClients[index];
+      await updateUser(client);
+      setClients(updatedClients);
+    } catch (error) {
+      console.log("Erro ao bloquear o usuario: ", error);
+    }
+  };
+
   useEffect(() => {
     async function fetchUsers() {
       try {
         const users = await getAllUsers();
-        const filteredUsers = users.filter(user => user.tipoUsuario == 0);
-        console.log(filteredUsers);
+        const filteredUsers = users.filter(user => user.tipoUsuario === 0);
         setClients(filteredUsers);
       } catch (error) {
         console.error('Erro ao buscar usarios:', error);
@@ -30,44 +43,29 @@ const GerirContasClientes = () => {
     fetchUsers();
   }, []);
 
-  const handleBlockClient = async (index) => {
-    const updatedClients = [...clients];
-    updatedClients[index].status = false;
-    try {
-      const client = updatedClients[index];
-      console.log(client);
-      await updateUser(client);
-      setClients(updatedClients);
-    } catch (error) {
-      console.log("Erro ao bloquear o usuario: ", error);
-    }
-  };
-
-
-
   return (
-    <div className="flex flex-col justify-center items-center h-screen">
-      <header className="w-full bg-custombrown text-white p-4">
-        <h1 className="text-2xl font-bold text-center">Gerir Contas de Clientes</h1>
-      </header>
-      <div className="container mx-auto mt-4">
-        <div className="mb-4 overflow-y-auto" style={{ maxHeight: '400px', width: '1100px' }}>
-          <label className="block text-white text-sm font-bold mb-2">Contas de Clientes:</label>
-          <table className="min-w-full divide-gray-200 bg-white shadow-md rounded-lg">
-            <thead className="bg-gray-50">
+    <div className="flex justify-center items-start h-screen mt-4 ">
+      <div className="container mx-auto mt-4 p-4 bg-white rounded-lg shadow-md">
+        <header className="w-full bg-gray-800 text-white p-4 rounded-t-lg">
+          <h1 className="text-xl font-bold">Gerir Contas de Clientes</h1>
+        </header>
+        <div className="mb-4 overflow-y-auto" style={{ maxHeight: '400px' }}>
+          <label className="block text-gray-700 text-sm font-bold mb-2">Contas de Clientes:</label>
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-800 text-white">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Nome</th>
-                <th className="px-6 py-3 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Ações</th>
+                <th className="px-6 py-3 text-left text-sm font-bold uppercase tracking-wider">Nome</th>
+                <th className="px-6 py-3 text-left text-sm font-bold uppercase tracking-wider">Email</th>
+                <th className="px-6 py-3 text-left text-sm font-bold uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-sm font-bold uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {clients.map((client, index) => (
-                <tr key={client.id}>
+                <tr key={client.id} className="hover:bg-gray-100">
                   <td className="px-6 py-4 whitespace-nowrap">{client.nomeCompleto}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{client.enderecoEmail}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{client.status ? "Ativa" : "Destativada"}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{client.status ? "Ativa" : "Desativada"}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {client.status === false && (
                       <button

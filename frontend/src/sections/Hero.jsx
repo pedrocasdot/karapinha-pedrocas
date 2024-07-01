@@ -50,7 +50,7 @@ const Hero = () => {
                       
                     </div>
                     <Link to="/login">
-                        <button data-aos ='zoom-in' className='px-10 py-4 rounded-xl border-2 border-black text-black font-semibold text-lg hover:bg-black hover:text-white'>
+                        <button className='px-10 py-4 rounded-xl border-2 border-black text-black font-semibold text-lg hover:bg-black hover:text-white'>
                             Fazer Login
                         </button>
                     </Link>

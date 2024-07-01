@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import Modal from 'react-modal';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -52,6 +52,20 @@ const GerirProfissionais = () => {
   };
 
   const handleAddSchedule = () => {
+    if (schedules.length === 0) {
+      setSchedules([...schedules, null]);
+      return;
+    }
+
+    const lastSchedule = schedules[schedules.length - 1];
+
+    if (lastSchedule === null) {
+      setModalMessage('O Horário não pode ser nulo');
+      setModalIsOpen(true);
+      setTimeout(() => setModalIsOpen(false), 3000);
+      return;
+    }
+
     setSchedules([...schedules, null]);
   };
 
@@ -90,7 +104,6 @@ const GerirProfissionais = () => {
       email: email,
       telemovel: phone,
       bi: idCard,
-      // horarios: schedules.map(schedule => schedule && schedule.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })),
     };
 
     try {
@@ -135,7 +148,6 @@ const GerirProfissionais = () => {
   const handleViewSchedules = async (professionalId) => {
     try {
       const schedulesFromApi = await getProfissinalHorarioById(professionalId);
-      console.log(schedulesFromApi);
       setSelectedProfessionalSchedules(schedulesFromApi);
       setModalMessage('');
       setModalIsOpen(true);
@@ -147,10 +159,10 @@ const GerirProfissionais = () => {
   };
 
   const startTime = new Date();
-  startTime.setHours(9, 0, 0); // Define 09:00 como horário inicial
+  startTime.setHours(9, 0, 0);
 
   const endTime = new Date();
-  endTime.setHours(19, 30, 0); // Define 19:30 como horário final
+  endTime.setHours(19, 30, 0);
 
   const CustomDatePickerInput = ({ value, onClick }) => (
     <input
@@ -163,52 +175,54 @@ const GerirProfissionais = () => {
   );
 
   return (
-    <div className="flex justify-center items-center w-full">
+    <div className="flex justify-center items-start h-screen mt-4">
       <div className="container mx-auto">
         <h1 className="text-2xl font-bold mb-4">Gestão de Profissionais</h1>
         <div>
-          <div className="mb-4 overflow-y-auto" style={{ maxHeight: '400px', width: '1100px' }}>
+          <div className="mb-4 overflow-y-auto" style={{ maxHeight: '400px' }}>
             <label className="block text-gray-700 text-sm font-bold mb-2">Profissionais Registrados:</label>
-            <table className="min-w-full divide-gray-200" style={{ width: '800px' }}>
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Nome</th>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Categoria</th>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Telemóvel</th>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {professionals.map((professional, index) => (
-                  <tr key={index}>
-                    <td className="px-8 py-4 whitespace-nowrap">{professional.nome}</td>
-                    <td className="px-8 py-4 whitespace-nowrap">{professional.category.name}</td>
-                    <td className="px-8 py-4 whitespace-nowrap">{professional.email}</td>
-                    <td className="px-8 py-4 whitespace-nowrap">{professional.telemovel}</td>
-                    <td className="px-8 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => handleViewSchedules(professional.id)}
-                        className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
-                      >
-                        Ver Horário
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProfessional(professional.id)}
-                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
-                      >
-                        Excluir
-                      </button>
-                      <button
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                      >
-                        Editar
-                      </button>
-                    </td>
+            <div className="w-full overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Nome</th>
+                    <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Categoria</th>
+                    <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Telemóvel</th>
+                    <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Ações</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {professionals.map((professional, index) => (
+                    <tr key={index}>
+                      <td className="px-8 py-4 whitespace-nowrap">{professional.nome}</td>
+                      <td className="px-8 py-4 whitespace-nowrap">{professional.category.name}</td>
+                      <td className="px-8 py-4 whitespace-nowrap">{professional.email}</td>
+                      <td className="px-8 py-4 whitespace-nowrap">{professional.telemovel}</td>
+                      <td className="px-8 py-4 whitespace-nowrap">
+                        <button
+                          onClick={() => handleViewSchedules(professional.id)}
+                          className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
+                        >
+                          Ver Horário
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProfessional(professional.id)}
+                          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
+                        >
+                          Excluir
+                        </button>
+                        <button
+                          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        >
+                          Editar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -308,7 +322,7 @@ const GerirProfissionais = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-center mt-4">
+        <div className="flex items-center justify-center mt-2">
           <button
             onClick={handleAddProfessional}
             className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-4"
@@ -329,12 +343,9 @@ const GerirProfissionais = () => {
               <div>
                 <h2>Horários do Profissional</h2>
                 <ul>
-                  {selectedProfessionalSchedules.length ?  selectedProfessionalSchedules.map((schedule, index) => (
-
-                    <li key={index}>
-                      {schedule}
-                    </li>
-                  )): <h3>Novato/NA</h3>}
+                  {selectedProfessionalSchedules.length ? selectedProfessionalSchedules.map((schedule, index) => (
+                    <li key={index}>{schedule}</li>
+                  )) : <h3>Novato/NA</h3>}
                 </ul>
               </div>
             )}

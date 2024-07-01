@@ -22,7 +22,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 ">
+    <div className="flex h-screen bg-gray-100 "  style={{ backgroundImage: `url(${sobre})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       {/* Sidebar */}
       <div className="bg-gray-900 text-gray-100 w-64 flex flex-col items-center">
         <div className="p-4">
@@ -37,15 +37,13 @@ const Dashboard = () => {
         </nav>
       </div>
 
-      <div className="flex-1" style={{ backgroundImage: `url(${sobre})` }}>
-        <div className="max-w-screen-lg mx-auto">
-          <div id='content' className="flex mb-1"> {/* Alteração aqui */}
+      <div className="flex-1 p-6 overflow-y-auto">
+        <div className="w-full h-full bg-white p-6 rounded-lg shadow-lg overflow-y-auto">
             {currentPage === 'perfil' && <Perfil />}
             {currentPage === 'marcacao' && <Marcacao />}
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

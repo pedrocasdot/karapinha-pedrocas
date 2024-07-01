@@ -20,7 +20,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100" style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
       {/* Sidebar */}
       <div className="bg-gray-800 text-gray-100 w-64 flex flex-col items-center">
         <div className="p-4">
@@ -34,14 +34,11 @@ const Dashboard = () => {
         </nav>
       </div>
 
-      <div className="relative flex-1 p-1">
-        <div className="absolute inset-0 bg-black opacity-90" style={{ backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
-        <div className="relative max-w-screen-lg mx-auto z-10">
-          <div id='content' className="flex">
+      <div className="flex-1 p-6 overflow-y-auto">
+        <div className="w-full h-full bg-white p-6 rounded-lg shadow-lg overflow-y-auto">
             {currentPage === 'clientes' && <GerirContasClientes />}
             {currentPage === 'administrativos' && <RegistrarAdministrativo />}
           </div>
-        </div>
       </div>
     </div>
   );

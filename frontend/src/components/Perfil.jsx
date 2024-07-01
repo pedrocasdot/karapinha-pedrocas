@@ -2,16 +2,13 @@ import React, { useState, useContext } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { UserContext } from '../services/UserContext'; // Importa o UserContext
 import { updateUser } from '../services/apiService';
-import Modal from 'react-modal'
+import Modal from 'react-modal';
 import { customStyles } from '../services/custom';
-
 
 Modal.setAppElement('#root');
 
-
 const UserProfileForm = () => {
-  const { user, setUser } = useContext(UserContext);
-  console.log(user);
+  const { user } = useContext(UserContext);
   const [formData, setFormData] = useState({
     id: user.id,
     nomeCompleto: user.nomeCompleto || '',
@@ -27,11 +24,8 @@ const UserProfileForm = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-
-
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -44,33 +38,31 @@ const UserProfileForm = () => {
     }
     setFormData({
       ...formData,
-      [name]: files ? files[0] : value
+      [name]: files ? files[0] : value,
     });
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (formData.password && !formData.confirmPassword) newErrors.confirmPassword = 'Deve confirmar a password';
-    if (formData.password && formData.confirmPassword &&
-      formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords não coincidem';
+    if (formData.password && !formData.confirmPassword)
+      newErrors.confirmPassword = 'Deve confirmar a password';
+    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = 'Passwords não coincidem';
     return newErrors;
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
     } else {
-      let userData = {
-        ...formData,
-      };
+      let userData = { ...formData };
       delete userData.confirmPassword;
       try {
-        console.log(user);
-
-        Object.keys(userData).forEach(key => {
+        Object.keys(userData).forEach((key) => {
           if (userData[key] === '' || userData[key] === null || userData[key] === undefined) {
-              userData[key] = user[key]
+            userData[key] = user[key];
           }
         });
         await updateUser(userData);
@@ -87,7 +79,6 @@ const UserProfileForm = () => {
 
   return (
     <div className="container flex justify-center items-center min-h-screen">
-
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
 
         {previewImage && (
@@ -99,8 +90,9 @@ const UserProfileForm = () => {
             />
           </div>
         )}
+
         <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Nome Completo</label>
+          <label className="block text-black text-sm font-bold mb-2">Nome Completo</label>
           <input
             type="text"
             name="nomeCompleto"
@@ -111,8 +103,9 @@ const UserProfileForm = () => {
           />
           {errors.nomeCompleto && <p className="text-red-500 text-xs italic">{errors.nomeCompleto}</p>}
         </div>
+
         <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Endereço de Email</label>
+          <label className="block text-black text-sm font-bold mb-2">Endereço de Email</label>
           <input
             type="email"
             name="enderecoEmail"
@@ -123,8 +116,9 @@ const UserProfileForm = () => {
           />
           {errors.enderecoEmail && <p className="text-red-500 text-xs italic">{errors.enderecoEmail}</p>}
         </div>
+
         <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Telemóvel</label>
+          <label className="block text-black text-sm font-bold mb-2">Telemóvel</label>
           <input
             type="text"
             name="telemovel"
@@ -135,8 +129,9 @@ const UserProfileForm = () => {
           />
           {errors.telemovel && <p className="text-red-500 text-xs italic">{errors.telemovel}</p>}
         </div>
+
         <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Foto</label>
+          <label className="block text-black text-sm font-bold mb-2">Foto</label>
           <input
             type="file"
             name="foto"
@@ -145,8 +140,9 @@ const UserProfileForm = () => {
           />
           {errors.foto && <p className="text-red-500 text-xs italic">{errors.foto}</p>}
         </div>
+
         <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Bilhete de Identidade</label>
+          <label className="block text-black text-sm font-bold mb-2">Bilhete de Identidade</label>
           <input
             type="text"
             name="bi"
@@ -157,8 +153,9 @@ const UserProfileForm = () => {
           />
           {errors.bi && <p className="text-red-500 text-xs italic">{errors.bi}</p>}
         </div>
+
         <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Username</label>
+          <label className="block text-black text-sm font-bold mb-2">Username</label>
           <input
             type="text"
             name="username"
@@ -169,8 +166,9 @@ const UserProfileForm = () => {
           />
           {errors.username && <p className="text-red-500 text-xs italic">{errors.username}</p>}
         </div>
+
         <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Password</label>
+          <label className="block text-black text-sm font-bold mb-2">Password</label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -196,8 +194,9 @@ const UserProfileForm = () => {
           </div>
           {errors.password && <p className="text-red-500 text-xs italic">{errors.password}</p>}
         </div>
+
         <div className="w-full">
-          <label className="block text-white text-sm font-bold mb-2">Confirmação da Password</label>
+          <label className="block text-black text-sm font-bold mb-2">Confirmação da Password</label>
           <div className="relative">
             <input
               type={showConfirmPassword ? "text" : "password"}
@@ -223,6 +222,7 @@ const UserProfileForm = () => {
           </div>
           {errors.confirmPassword && <p className="text-red-500 text-xs italic">{errors.confirmPassword}</p>}
         </div>
+
         <div className="col-span-2 flex items-center justify-center">
           <button
             type="submit"
@@ -231,14 +231,18 @@ const UserProfileForm = () => {
             Salvar
           </button>
         </div>
+
       </form>
+
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
         style={customStyles}
-        contentLabel="Mensagem do Sistema"
+        contentLabel="Example Modal"
       >
-        <div>{modalMessage}</div>
+        <div className="text-center">
+          <p>{modalMessage}</p>
+        </div>
       </Modal>
     </div>
   );

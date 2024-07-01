@@ -220,10 +220,28 @@ const RegisterForm = ({ toggleForm }) => {
         setTimeout(() => setModalIsOpen(false), 3000);
         sendEmail(response);
       } catch (error) {
-        console.error('Erro ao registrar:', error.message);
-        setModalMessage('Erro ao criar a conta, por favor tente novamente');
+        console.error('Erro ao registrar:', error);
+        let errorMessage = 'Erro ao criar a conta, por favor tente novamente';
+
+        // Verifica se error.errors é um objeto
+        if (error.errors && typeof error.errors === 'object') {
+          // Constrói uma mensagem de erro a partir do objeto com quebras de linha
+          errorMessage = Object.entries(error.errors)
+            .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+            .join('\n');
+        } else if (typeof error === 'string') {
+          // Se error é uma string, use-a diretamente
+          errorMessage = error;
+        } else if (error.message) {
+          // Se error contém uma mensagem diretamente, use-a
+          errorMessage = error.message;
+        }
+
+        // Exibe a mensagem de erro com quebras de linha
+        setModalMessage(errorMessage);
         setModalIsOpen(true);
-        setTimeout(() => setModalIsOpen(false), 3000);
+        setTimeout(() => setModalIsOpen(false), 8000);
+
 
       }
     }

@@ -1,24 +1,18 @@
-import React, { useState, useEffect, useContext} from 'react';
-import Marcacao from './Marcacao';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Perfil from './Perfil';
+import { UserContext } from '../services/UserContext';
 import GerirProfissionais from './GerirProfissinais';
 import GerirServicos from './GerirServicos';
 import ConfirmarMarcacoes from './ConfirmarMarcacoes';
+import sobre from '../assets/images/whychoose2.jpg';
 import { getAllCategories } from '../services/apiService';
 import AOS from 'aos';
-import { UserContext } from '../services/UserContext';
 import 'aos/dist/aos.css';
-
 
 const Admnistrativo = () => {
   const [currentPage, setCurrentPage] = useState(null);
   const navigate = useNavigate();
-  const {setUser } = useContext(UserContext);
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-  
+  const { setUser } = useContext(UserContext);
 
   useEffect(() => {
     AOS.init({
@@ -27,38 +21,61 @@ const Admnistrativo = () => {
       easing: 'ease-in-sine',
       delay: 100,
     });
-
-    // Função para buscar serviços
-   
   }, []);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   const handleLogout = () => {
     setUser(null);
     navigate('/');
   };
+
   return (
-    <div data-aos="fade-in" className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
+    <div
+      data-aos="fade-in"
+      className="flex h-screen w-screen bg-gray-100"
+      style={{ backgroundImage: `url(${sobre})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+    >
       <div className="bg-gray-800 text-gray-100 w-64 flex flex-col items-center">
-        <div className="p-4">
-          <h1 className="text-3xl font-bold">Dashboard Admnistrativo</h1>
-          <p className="text-sm">Bem-vindo!</p>
+        <div className="p-6">
+          <h1 className="text-xl font-bold mb-2">Dashboard Administrativo</h1>
+          <p className="text-lg">Bem-vindo!</p>
         </div>
         <nav className="flex-1">
-          <button onClick={() => handlePageChange('profissionais')} className="block p-4 hover:bg-gray-700 transition duration-300">Gerir Profissionais</button>
-          <button onClick={() => handlePageChange('servicos')} className="block p-4 hover:bg-gray-700 transition duration-300">Gerir Serviços</button>
-          <button onClick={() => handlePageChange('marcacoes')} className="block p-4 hover:bg-gray-700 transition duration-300">Gerir Marcação</button>
-          <button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 mt-4 mx-4 transition duration-300">Logout</button>
-
+          <button
+            onClick={() => handlePageChange('profissionais')}
+            className={`block p-4 text-lg focus:bg-gray-700 focus:text-white transition duration-300 ${currentPage === 'profissionais' ? 'bg-gray-700 text-white' : 'hover:bg-gray-700'}`}
+          >
+            Gerir Profissionais
+          </button>
+          <button
+            onClick={() => handlePageChange('servicos')}
+            className={`block p-4 text-lg focus:bg-gray-700 focus:text-white transition duration-300 ${currentPage === 'servicos' ? 'bg-gray-700 text-white' : 'hover:bg-gray-700'}`}
+          >
+            Gerir Serviços
+          </button>
+          <button
+            onClick={() => handlePageChange('marcacoes')}
+            className={`block p-4 text-lg focus:bg-gray-700 focus:text-white transition duration-300 ${currentPage === 'marcacoes' ? 'bg-gray-700 text-white' : 'hover:bg-gray-700'}`}
+          >
+            Gerir Marcações
+          </button>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 mt-4 mx-4 transition duration-300"
+          >
+            Logout
+          </button>
         </nav>
       </div>
 
-      <div className="flex-1 p-1">
-        <div className="max-w-screen-lg mx-auto">
-          <div id='content' className="flex"> {/* Alteração aqui */}
-            {currentPage === 'profissionais' && <GerirProfissionais />}
-            {currentPage === 'servicos' && <GerirServicos />}
-            {currentPage === 'marcacoes' && <ConfirmarMarcacoes />}
-          </div>
+      <div className="flex-1 p-6 overflow-y-auto">
+        <div className="w-full h-full bg-white p-6 rounded-lg shadow-lg overflow-y-auto">
+          {currentPage === 'profissionais' && <GerirProfissionais />}
+          {currentPage === 'servicos' && <GerirServicos />}
+          {currentPage === 'marcacoes' && <ConfirmarMarcacoes />}
         </div>
       </div>
     </div>

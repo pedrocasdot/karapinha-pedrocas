@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import jsPDF from 'jspdf';
+import TimePicker from 'react-time-picker'; // 
 import Modal from 'react-modal';
 import logo from '../assets/images/logo.png';
 import { UserContext } from '../services/UserContext';
@@ -7,7 +8,7 @@ import { customStyles } from '../services/custom';
 import {
   getAllProfessionals, getAllCategories, getAllServices, getProfissionalById,
   registerAppointment, getCategoryById, getAllAppointments,
-  getServiceById, deleteAppointment
+  getServiceById, deleteAppointment, getProfissinalHorarioById
 } from '../services/apiService';
 import { FaShoppingCart } from 'react-icons/fa';
 
@@ -25,6 +26,7 @@ const Marcacao = () => {
 
   const [categories, setCategories] = useState([]);
   const [professionals, setProfessionals] = useState([]);
+  const [horarios, setHorarios] = useState([]);
   const [cart, setCart] = useState([]); // Estado do carrinho
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -63,12 +65,15 @@ const Marcacao = () => {
             price: serv.price,
             user: user
           };
+
           const isConflict = bookings.some(
             booking =>
               booking.date === marcacao_.date &&
               booking.time === marcacao_.time
           );
-          if (!isConflict) {
+
+
+          if (!isConflict && user.id === marcacao.userId) {
             setBookings([...bookings, marcacao_])
           }
         });
@@ -76,6 +81,7 @@ const Marcacao = () => {
         console.error('Erro ao buscar categorias:', error);
       }
     }
+
     fetchMarcacoes();
     fetchCategories();
   }, []);
@@ -110,7 +116,16 @@ const Marcacao = () => {
   };
 
   const handleProfessionalChange = (e) => {
+    const selectedProfessional = professionals.find(prof => prof.nome === e.target.value);
+    const getHorarioProfissional = async () => {
+      const horariosFromApi = await getProfissinalHorarioById(selectedProfessional.id);
+      setHorarios(horariosFromApi);
+      console.log(horarios);
+    }
+
+    getHorarioProfissional();
     setProfessional(e.target.value);
+
   };
 
   const handleDateChange = (e) => {
@@ -175,8 +190,9 @@ const Marcacao = () => {
       setTimeout(() => setModalIsOpen(false), 3000);
       return;
     }
-
-    setCart([...cart, newBooking]);
+    const newBookingExtra = { ...newBooking, idProfissional: 1, idCategory: 1, idService: 1 };
+    
+    setCart([...cart, newBookingExtra]);
 
     setCategory('');
     setServices([]);
@@ -190,28 +206,30 @@ const Marcacao = () => {
     const updatedCart = cart.filter((item, i) => i !== index);
     setCart(updatedCart);
   };
-  const handleDeleteBooking = async(index) => {
-    try{
-      await deleteAppointment(bookings.at(index).id);
+
+  const handleDeleteBooking = async (index) => {
+    try {
+      await deleteAppointment(bookings[index].id);
       const updatedBookings = bookings.filter((item, i) => i !== index);
       setBookings(updatedBookings);
       setModalMessage("Marcação foi removida com sucesso!");
       setModalIsOpen(true);
       setTimeout(() => setModalIsOpen(false), 3000);
-    }catch(error){
+    } catch (error) {
       console.log(error);
       setModalMessage("Algum erro aconteceu, não foi possível remover a marcação!");
       setModalIsOpen(true);
       setTimeout(() => setModalIsOpen(false), 3000);
     }
   };
+
   const handleFinalizeBooking = async () => {
     try {
       for (let booking of cart) {
         const newAppointment = {
-          serviceId: services.find(ser => ser.serviceName.toLowerCase() === booking.service.toLowerCase()).id,
-          categoryId: categories.find(cat => cat.name.toLowerCase() === booking.category.toLowerCase()).id,
-          profissionalId: professionals.find(prof => prof.nome.toLowerCase() === booking.professional.toLowerCase()).id,
+          serviceId: booking.idService,
+          categoryId: booking.idCategory,
+          profissionalId: booking.idProfissional,
           status: false,
           time: booking.time,
           appointmentDate: booking.date,
@@ -235,8 +253,6 @@ const Marcacao = () => {
     }
   };
 
-  
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (cartRef.current && !cartRef.current.contains(event.target)) {
@@ -256,188 +272,205 @@ const Marcacao = () => {
   }, [isCartOpen]);
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <div className="container mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold text-white">Agendamento de Salão de Beleza</h1>
-          <div className="relative" ref={cartRef}>
-            <button
-              onClick={() => setIsCartOpen(!isCartOpen)}
-              className="relative bg-custombrown text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              <FaShoppingCart />
-              {cart.length > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                  {cart.length}
-                </span>
-              )}
-            </button>
-            {isCartOpen && (
-              <div className="absolute right-0 w-64 bg-white shadow-lg rounded p-4 mt-2 z-10">
-                <h2 className="text-lg font-bold mb-2">Itens no Carrinho:</h2>
-                {cart.map((item, index) => (
-                  <div key={index} className="flex justify-between items-center mb-2">
-                    <div>
-                      <p>{item.service} com {item.professional}</p>
-                      <p>{item.date} às {item.time}</p>
-                    </div>
+    <div className="container mx-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold text-custombrown">Agendamento de Salão de Beleza</h1>
+        <div className="relative" ref={cartRef}>
+          <button
+            onClick={() => setIsCartOpen(!isCartOpen)}
+            className="flex items-center bg-custombrown hover:bg-custombrown1 text-white font-bold px-4 py-2 rounded focus:outline-none"
+          >
+            <FaShoppingCart className="mr-2" />
+            Carrinho ({cart.length})
+          </button>
+          {isCartOpen && cart.length > 0 && (
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg overflow-hidden z-10">
+              <div className="py-2 px-3 bg-gray-200 text-gray-800 font-semibold">
+                Carrinho de Agendamentos
+              </div>
+              <div className="divide-y">
+                {cart.map((booking, index) => (
+                  <div key={index} className="py-2 px-3">
+                    <p className="text-sm font-medium">{booking.date}, {booking.time}</p>
+                    <p className="text-sm">{booking.service}</p>
                     <button
+                      className="text-xs text-red-500 mt-1 hover:text-red-700 focus:outline-none"
                       onClick={() => handleRemoveFromCart(index)}
-                      className="bg-red-500 text-white rounded px-2 py-1"
                     >
                       Remover
                     </button>
                   </div>
                 ))}
-                <button
-                  onClick={handleFinalizeBooking}
-                  className="bg-custombrown1  text-white font-bold py-2 px-4 rounded mt-2"
-                >
-                  Finalizar Agendamentos
-                </button>
               </div>
-            )}
-          </div>
-        </div>
-        <div>
-          <div className="mb-4 overflow-y-auto" style={{ maxHeight: '400px', width: '1100px' }}>
-            <label className="block text-white text-sm font-bold mb-2">Marcações Agendadas:</label>
-            <table className="min-w-full divide-gray-200" style={{ width: '800px' }}>
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Categoria</th>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Serviço</th>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Profissional</th>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Data</th>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Hora</th>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Preço</th>
-                  <th className="px-8 py-4 text-left text-sm font-bold text-gray-500 uppercase tracking-wider">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {bookings
-                  .filter(book => book.user.id == user.id)
-                  .map((booking, index) => (
-                    <tr key={index}>
-                      <td className="px-8 py-4 whitespace-nowrap">{booking.category}</td>
-                      <td className="px-8 py-4 whitespace-nowrap">{booking.service}</td>
-                      <td className="px-8 py-4 whitespace-nowrap">{booking.professional}</td>
-                      <td className="px-8 py-4 whitespace-nowrap">{booking.date}</td>
-                      <td className="px-8 py-4 whitespace-nowrap">{booking.time}</td>
-                      <td className="px-8 py-4 whitespace-nowrap">KZ {booking.price.toFixed(2)}</td>
-                      <td className="px-8 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => handleDeleteBooking(index)}
-                          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
-                        >
-                          Excluir
-                        </button>
-                        <button
-                          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        >
-                          Editar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <form>
-                <div className="mb-4">
-                  <label className="block text-white text-sm font-bold mb-2">Categoria:</label>
-                  <select
-                    onChange={handleCategoryChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="">Selecione uma categoria</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.name}>{category.name}</option>
-                    ))}
-                  </select>
-                </div>
-                {category && (
-                  <>
-                    <div className="mb-4">
-                      <label className="block text-white text-sm font-bold mb-2">Serviços:</label>
-                      <select
-                        onChange={handleServiceChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        required>
-                        <option value="">Selecione um serviço</option>
-                        {services.map((service) => (
-                          <option key={service.id} value={service.serviceName}>{service.serviceName}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-white text-sm font-bold mb-2">Profissional:</label>
-                      <select
-                        onChange={handleProfessionalChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        required
-                      >
-                        <option value="">Selecione um profissional</option>
-                        {professionals.map((professional) => (
-                          <option key={professional.id} value={professional.nome}>{professional.nome}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </>
-                )}
-              </form>
+              <button
+                onClick={handleFinalizeBooking}
+                className="block w-full py-2 px-4 bg-custombrown text-white text-center font-bold hover:bg-custombrown1 focus:outline-none"
+              >
+                Finalizar Agendamentos
+              </button>
             </div>
-            <div>
-              <div className="mb-4">
-                <label className="block text-white text-sm font-bold mb-2">Data:</label>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={handleDateChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-              <div className="mb-6">
-                <label htmlFor="time-picker" className="block text-white text-sm font-bold mb-2">Hora:</label>
-                <input
-                  id='time-picker'
-                  type="time"
-                  value={time}
-                  onChange={handleTimeChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
+          )}
         </div>
-        <div className="flex items-center justify-center mt-4">
+      </div>
+
+      <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="categoria">
+            Categoria
+          </label>
+          <select
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="categoria"
+            onChange={handleCategoryChange}
+            value={category}
+          >
+            <option value="">Selecione uma categoria</option>
+            {categories.map((category, index) => (
+              <option key={index} value={category.name}>{category.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {services.length > 0 && (
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="servico">
+              Serviço
+            </label>
+            <select
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="servico"
+              onChange={handleServiceChange}
+              value={service}
+            >
+              <option value="">Selecione um serviço</option>
+              {services.map((service, index) => (
+                <option key={index} value={service.serviceName}>{service.serviceName}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {professionals.length > 0 && (
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="profissional">
+              Profissional
+            </label>
+            <select
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="profissional"
+              onChange={handleProfessionalChange}
+              value={professional}
+            >
+              <option value="">Selecione um profissional</option>
+              {professionals.map((professional, index) => (
+                <option key={index} value={professional.nome}>{professional.nome}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="data">
+            Data
+          </label>
+          <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="data"
+            type="date"
+            onChange={handleDateChange}
+            value={date}
+          />
+        </div>
+
+        {professional && (
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="time">
+              Hora
+            </label>
+            <select
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="time"
+              onChange={handleTimeChange}
+              value={time}
+            >
+              <option value="">Selecione um horário</option>
+              {horarios.map((horario, index) => (
+                <option key={index} value={horario}>{horario}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="flex items-center justify-center">
           <button
             onClick={handleAddToCart}
-            className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-4"
+            className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
-            Adicionar ao Carrinho
+            Agendar
           </button>
         </div>
-
-        <Modal
-          isOpen={modalIsOpen}
-          onRequestClose={() => setModalIsOpen(false)}
-          style={customStyles}
-          contentLabel="Mensagem do Sistema"
-        >
-          <div>{modalMessage}</div>
-        </Modal>
       </div>
+
+      {bookings.length > 0 && (
+        <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+          <h2 className="text-xl font-bold mb-4">Suas Marcações</h2>
+          <table className="w-full table-auto">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="px-4 py-2">Categoria</th>
+                <th className="px-4 py-2">Serviço</th>
+                <th className="px-4 py-2">Profissional</th>
+                <th className="px-4 py-2">Data</th>
+                <th className="px-4 py-2">Hora</th>
+                <th className="px-4 py-2">Preço</th>
+                <th className="px-4 py-2">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.map((booking, index) => (
+                <tr key={index} className="text-gray-700">
+                  <td className="border px-4 py-2">{booking.category}</td>
+                  <td className="border px-4 py-2">{booking.service}</td>
+                  <td className="border px-4 py-2">{booking.professional}</td>
+                  <td className="border px-4 py-2">{booking.date}</td>
+                  <td className="border px-4 py-2">{booking.time}</td>
+                  <td className="border px-4 py-2">KZ {booking.price.toFixed(2)}</td>
+                  <td className="border px-4 py-2">
+                    {user && (
+                      <>
+                        <button
+                          onClick={() => handleDeleteBooking(index)}
+                          className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline mr-2"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          onClick={() => handleGeneratePDF(booking)}
+                          className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                        >
+                          PDF
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={() => setModalIsOpen(false)}
+        style={customStyles}
+        contentLabel="Mensagem do Sistema"
+      >
+        <h2 className="text-xl font-bold mb-4 text-center">Atenção</h2>
+        <p className="text-gray-800 text-center">{modalMessage}</p>
+      </Modal>
     </div>
   );
 };
 
 export default Marcacao;
-

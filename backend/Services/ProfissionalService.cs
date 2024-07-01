@@ -30,10 +30,6 @@ namespace backend.Services
                 Telemovel = p.Telemovel,
                 CategoryId = p.CategoryId,
                 Category = _categoryService.GetCategoryByIdAsync((int)p.CategoryId).Result,
-                // horarios = _profissionalHorarioService.GetProfissionalHorariosAsync( p.Id)
-                //                         .Result
-                //                         .Select(ph => ph.horario)
-                //                         .ToList(),
                 BI = p.BI,
                 Email = p.Email,
             });

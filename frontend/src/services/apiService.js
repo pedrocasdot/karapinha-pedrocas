@@ -205,7 +205,35 @@ export const sendEmail = (user) => {
 
 }
 
+export const ativarConta = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/users/activate/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.response.data);
+  }
+};
+
+export const desativarConta = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/users/deactivate/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.response.data);
+  }
+};
 
 export const registerAppointment = async (dados) => {
   try {

@@ -136,8 +136,9 @@ const Marcacao = () => {
     setTime(e.target.value);
   };
 
-  const handleGeneratePDF = (booking) => {
+  const handleGeneratePDF = (bookings) => {
     const doc = new jsPDF('p', 'mm', 'a4');
+    let totalPrice = 0;
 
     // Adicionar logo e nome da empresa
     const logoImg = new Image();
@@ -146,16 +147,33 @@ const Marcacao = () => {
     doc.setFontSize(18);
     doc.text('KARAPINHA XPTO', 60, 30);
 
+    // Adicionar título da fatura
+    doc.setFontSize(16);
+    doc.text('Fatura de Agendamentos', 10, 50);
+
     // Adicionar detalhes da reserva
+    bookings.forEach((booking, index) => {
+      const y = 70 + (index * 20); // Espaçamento entre os itens
+      doc.setFontSize(14);
+      doc.text(`Categoria: ${booking.category}`, 10, y);
+      doc.text(`Serviço: ${booking.service}`, 10, y + 10);
+      doc.text(`Profissional: ${booking.professional}`, 10, y + 20);
+      doc.text(`Data: ${booking.date}`, 10, y + 30);
+      doc.text(`Hora: ${booking.time}`, 10, y + 40);
+      doc.text(`Preço: KZ ${booking.price.toFixed(2)}`, 10, y + 50);
+      doc.line(10, y + 55, 200, y + 55); // Linha separadora
+      totalPrice += booking.price;
+    });
+
+    // Adicionar preço total
+    const finalY = 70 + (bookings.length * 20) + 10;
+    doc.setFontSize(16);
+    doc.text(`Preço Total: KZ ${totalPrice.toFixed(2)}`, 10, finalY);
+
+    // Adicionar detalhes do cliente
     doc.setFontSize(14);
-    doc.text(`Categoria: ${booking.category}`, 10, 60);
-    doc.text(`Serviço: ${booking.service}`, 10, 70);
-    doc.text(`Profissional: ${booking.professional}`, 10, 80);
-    doc.text(`Data: ${booking.date}`, 10, 90);
-    doc.text(`Hora: ${booking.time}`, 10, 100);
-    doc.text(`Preço: KZ ${price.toFixed(2)}`, 10, 110);
-    doc.text(`Cliente: ${user.nomeCompleto}`, 10, 120);
-    doc.text(`Email do Cliente: ${user.enderecoEmail}`, 10, 130);
+    doc.text(`Cliente: ${user.nomeCompleto}`, 10, finalY + 20);
+    doc.text(`Email do Cliente: ${user.enderecoEmail}`, 10, finalY + 30);
 
     const totalPages = doc.internal.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
@@ -164,7 +182,7 @@ const Marcacao = () => {
       doc.text(`Página ${i} de ${totalPages}`, doc.internal.pageSize.width - 50, doc.internal.pageSize.height - 10);
     }
 
-    doc.save('agendamento.pdf');
+    doc.save(`agendamentos-${user.nomeCompleto}.pdf`);
   };
 
   const handleAddToCart = () => {
@@ -191,7 +209,7 @@ const Marcacao = () => {
       return;
     }
     const newBookingExtra = { ...newBooking, idProfissional: 1, idCategory: 1, idService: 1 };
-    
+
     setCart([...cart, newBookingExtra]);
 
     setCategory('');
@@ -238,9 +256,9 @@ const Marcacao = () => {
 
         await registerAppointment(newAppointment);
         setBookings([...bookings, booking]);
-        handleGeneratePDF(booking);
+       
       }
-
+      handleGeneratePDF(bookings);
       setCart([]);
       setModalMessage('Agendamentos realizados com sucesso!');
       setModalIsOpen(true);

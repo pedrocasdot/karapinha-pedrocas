@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using backend.DTO;
+using backend.Services;
 using backend.Shared.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,10 +14,15 @@ namespace backend.Controllers
     public class AppointmentsController : ControllerBase
     {
         private readonly IAppointmentService _appointmentService;
+        private readonly IUserService _userService;
 
-        public AppointmentsController(IAppointmentService appointmentService)
+         public EmailService EmailService { get; }
+
+        public AppointmentsController(IAppointmentService appointmentService, IUserService userService, EmailService emailService)
         {
             _appointmentService = appointmentService;
+            _userService = userService;
+            EmailService = emailService;
         }
 
         [HttpGet]
@@ -41,7 +47,9 @@ namespace backend.Controllers
         public async Task<ActionResult> CreateAppointment(AppointmentDTO appointment)
         {
             await _appointmentService.CreateAppointmentAsync(appointment);
-            
+            var userEmail  = await _userService.GetUserByIdAsync((int)appointment.UserId);
+
+            EmailService.SendEmail(userEmail.EnderecoEmail, "Confirmação de agendamento", "Seu agendamento foi realizado com sucesso, aguarde pela confirmação!");
             return CreatedAtAction(nameof(GetAppointment), new { id = appointment.Id }, appointment);
         }
 

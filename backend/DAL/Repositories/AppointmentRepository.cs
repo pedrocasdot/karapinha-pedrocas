@@ -32,6 +32,7 @@ namespace backend.DAL.Repositories
         public async Task UpdateAppointmentAsync(Appointment appointment)
         {
             _context.Entry(appointment).State = EntityState.Modified;
+            
             await _context.SaveChangesAsync();
         }
 

@@ -96,6 +96,8 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IServicoService, ServicoService>();
 builder.Services.AddScoped<IProfissionalHorarioService, ProfissionalHorarioService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<EmailService>();
+
 
 var app = builder.Build();
 

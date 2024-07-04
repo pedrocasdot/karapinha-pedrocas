@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../services/UserContext';
 import GerirProfissionais from './GerirProfissinais';
 import GerirServicos from './GerirServicos';
+import DashboardAdmin from './DashboardAdmin';
 import ConfirmarMarcacoes from './ConfirmarMarcacoes';
 import sobre from '../assets/images/whychoose2.jpg';
 import { getAllCategories } from '../services/apiService';
@@ -10,7 +11,7 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 const Admnistrativo = () => {
-  const [currentPage, setCurrentPage] = useState(null);
+  const [currentPage, setCurrentPage] = useState('dashboard');
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
 
@@ -45,6 +46,12 @@ const Admnistrativo = () => {
         </div>
         <nav className="flex-1">
           <button
+            onClick={() => handlePageChange('dashboard')}
+            className={`block p-4 text-lg focus:bg-gray-700 focus:text-white transition duration-300 ${currentPage === 'dashboard' ? 'bg-gray-700 text-white' : 'hover:bg-gray-700'}`}
+          >
+            Dashboard
+          </button>
+          <button
             onClick={() => handlePageChange('profissionais')}
             className={`block p-4 text-lg focus:bg-gray-700 focus:text-white transition duration-300 ${currentPage === 'profissionais' ? 'bg-gray-700 text-white' : 'hover:bg-gray-700'}`}
           >
@@ -73,6 +80,7 @@ const Admnistrativo = () => {
 
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="w-full h-full bg-white p-6 rounded-lg shadow-lg overflow-y-auto">
+          {currentPage === 'dashboard' && <DashboardAdmin />}
           {currentPage === 'profissionais' && <GerirProfissionais />}
           {currentPage === 'servicos' && <GerirServicos />}
           {currentPage === 'marcacoes' && <ConfirmarMarcacoes />}

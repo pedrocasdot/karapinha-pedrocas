@@ -19,7 +19,7 @@ namespace backend.DTO
 
         [Required(ErrorMessage = "O telemóvel é obrigatório.")]
         [StringLength(15, ErrorMessage = "O telemóvel deve ter no máximo 15 caracteres.")]
-        [RegularExpression(@"^(9(1|2|4|5))\d{7}$", ErrorMessage = "O telemóvel deve começar com '91', '92', '94' ou '95' seguido de mais 7 dígitos.")]
+        [RegularExpression(@"^(9(1|2|4|5|3|9))\d{7}$", ErrorMessage = "O telemóvel deve começar com '91', '92', '93','94','95' ou '99' seguido de mais 7 dígitos.")]
         public string? Telemovel { get; set; }
 
         [Required(ErrorMessage = "O BI é obrigatório.")]

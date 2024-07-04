@@ -5,7 +5,7 @@ import Modal from 'react-modal';
 import { FiEye, FiEyeOff } from 'react-icons/fi'; // Importando os ícones necessários
 
 import sobre from '../assets/images/whychoose2.jpg'
-import { registerUser, login, sendEmail } from '../services/apiService';
+import { registerUser, login } from '../services/apiService';
 import { UserContext } from '../services/UserContext';
 import { customStyles } from '../services/custom';
 
@@ -127,7 +127,7 @@ const LoginForm = ({ toggleForm }) => {
             className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             onClick={handleLogin}
           >
-            Login
+            Entrar
           </button>
           <a
             href="#"
@@ -218,7 +218,22 @@ const RegisterForm = ({ toggleForm }) => {
         setModalMessage('A sua conta foi criada com sucesso, aguarde pela ativação da conta!');
         setModalIsOpen(true);
         setTimeout(() => setModalIsOpen(false), 3000);
-        sendEmail(response);
+      
+        setFormData({
+          nomeCompleto: '',
+          bi: '',
+          username: '',
+          foto: '',
+          password: '',
+          confirmPassword: '',
+          telemovel: '',
+          enderecoEmail: '',
+          status: false,
+          tipoUsuario: 0,
+        });
+        setPreviewImage(null);
+        setShowPassword(false);
+        setShowConfirmPassword(false);
       } catch (error) {
         console.error('Erro ao registrar:', error);
         let errorMessage = 'Erro ao criar a conta, por favor tente novamente';

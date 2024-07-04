@@ -1,18 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { getAllUsers, updateUser } from '../services/apiService';
+import { getAllUsers, updateUser, ativarConta, desativarConta } from '../services/apiService';
+import { customStyles } from '../services/custom';
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root');
 
 const GerirContasClientes = () => {
   const [clients, setClients] = useState([]);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
   const handleActivateClient = async (index) => {
     const updatedClients = [...clients];
     updatedClients[index].status = true;
     try {
       const client = updatedClients[index];
-      await updateUser(client);
+      await ativarConta(client.id);
+      setModalMessage('A conta do usuário foi ativada/desbloquada com sucesso.');
+      setModalIsOpen(true);
+      setTimeout(() => setModalIsOpen(false), 3000);
       setClients(updatedClients);
+
     } catch (error) {
-      console.log("Erro ao atualizar os dados: ", error);
+      setModalMessage('Não foi possível ativar a conta do usuário.');
+      setModalIsOpen(true);
+      setTimeout(() => setModalIsOpen(false), 3000);
+      console.error('Erro ao ativar a conta do usuário:', error);
     }
   };
 
@@ -22,10 +35,18 @@ const GerirContasClientes = () => {
     console.log(updatedClients[index]);
     try {
       const client = updatedClients[index];
-      await updateUser(client);
+      
+      await desativarConta(client.id);
+      setModalMessage('A conta do usuário foi bloqueada/desativada com sucesso.');
+      setModalIsOpen(true);
+      setTimeout(() => setModalIsOpen(false), 3000);
       setClients(updatedClients);
+
     } catch (error) {
       console.log("Erro ao bloquear o usuario: ", error);
+      setModalMessage('Não foi possível bloquear/desativar a conta do usuário.');
+      setModalIsOpen(true);
+      setTimeout(() => setModalIsOpen(false), 3000);
     }
   };
 
@@ -39,7 +60,6 @@ const GerirContasClientes = () => {
         console.error('Erro ao buscar usarios:', error);
       }
     }
-
     fetchUsers();
   }, []);
 
@@ -89,6 +109,14 @@ const GerirContasClientes = () => {
             </tbody>
           </table>
         </div>
+        <Modal
+          isOpen={modalIsOpen}
+          onRequestClose={() => setModalIsOpen(false)}
+          style={customStyles}
+          contentLabel="Mensagem do Sistema"
+        >
+          <div>{modalMessage}</div>
+        </Modal>
       </div>
     </div>
   );

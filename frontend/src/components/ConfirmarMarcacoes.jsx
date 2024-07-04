@@ -29,7 +29,7 @@ const ConfirmarMarcacoes = () => {
             serviceId: service.id,
             professionalId: profissional.id,
             serviceName: service.serviceName,
-            categoryName: category.nome,
+            categoryName: category.name,
             professional: profissional.nome,
             status: marcacao.status,
           };

@@ -28,6 +28,7 @@
     "react-modal": "^3.16.1",
     "react-router-dom": "^6.23.1",
     "react-scroll": "^1.9.0",
+    "react-spinners": "^0.14.1",
     "react-time-picker": "^7.0.0"
   },
   "devDependencies": {

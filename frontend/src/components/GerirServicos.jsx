@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getAllCategories, registerCategory, registerService } from '../services/apiService';
+import { getAllCategories, registerCategory, registerService, getAllServices } from '../services/apiService';
 import AddCategoryModal from './AddCategoryModal'; // Importando o modal criado
 
 const GerirServicos = () => {
@@ -20,6 +20,16 @@ const GerirServicos = () => {
       }
     }
 
+    async function fetchServices() {
+      try {
+        const servicesFromApi = await getAllServices();
+        setServices(servicesFromApi);
+      } catch (error) {
+        console.error('Erro ao buscar serviços:', error);
+      }
+    }
+
+    fetchServices();
     fetchCategories();
   }, []);
 
@@ -82,7 +92,7 @@ const GerirServicos = () => {
     <div className="flex justify-center items-center h-full w-full">
       <div className="container mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold mb-4">Gestão de Serviços</h1>
-        <div className="mb-4 overflow-y-auto" style={{ maxHeight: '600px' }}>
+        <div className="mb-4 overflow-y-auto" style={{ maxHeight: '400px' }}>
           <label className="block text-gray-700 text-lg font-bold mb-2">Serviços Registrados:</label>
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -96,8 +106,8 @@ const GerirServicos = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {services.map((service, index) => (
                 <tr key={index}>
-                  <td className="px-4 py-2 whitespace-nowrap">{service.name}</td>
-                  <td className="px-4 py-2 whitespace-nowrap">{service.category}</td>
+                  <td className="px-4 py-2 whitespace-nowrap">{service.serviceName}</td>
+                  <td className="px-4 py-2 whitespace-nowrap">{service.category.name}</td>
                   <td className="px-4 py-2 whitespace-nowrap">{service.price}</td>
                   <td className="px-4 py-2 whitespace-nowrap">
                     <button

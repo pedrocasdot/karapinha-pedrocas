@@ -21,10 +21,12 @@ namespace backend.Services
         {
             var fromEmail = Configuration.GetSection("Constants:FromEmail").Value ?? string.Empty;
             var fromEmailPassword = Configuration.GetSection("Constants:EmailAccountPassword").Value ?? string.Empty;
+            var fromDisplayName = Configuration.GetSection("Constants:FromDisplayName").Value ?? string.Empty;
+
 
             var message = new MailMessage()
             {
-                From = new MailAddress(fromEmail),
+                From = new MailAddress(fromEmail, fromDisplayName),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true

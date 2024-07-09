@@ -10,8 +10,10 @@ namespace backend.Shared.Services
     {
         Task<IEnumerable<ProfissionalDTO>> GetAllProfissionalsAsync();
         Task<ProfissionalDTO> GetProfissionalByIdAsync(int id);
-        Task CreateProfissionalAsync(ProfissionalDTO user);
+        Task<ProfissionalDTO> CreateProfissionalAsync(ProfissionalDTO user);
         Task UpdateProfissionalAsync(ProfissionalDTO user);
+
+        Task<ProfissionalDTO> GetProfissionalByBIAsync(string BI);
         Task DeleteProfissionalAsync(int id);
     }
 }

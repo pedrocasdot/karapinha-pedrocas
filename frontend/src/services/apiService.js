@@ -282,9 +282,9 @@ export const registerProfissinal = async (userData) => {
   }
 };
 
-export const registerProfissinalHorario = async (userData) => {
+export const registerProfissinalHorario = async (profissionalHorarios) => {
   try {
-    const response = await axios.post(`${API_URL}/profissionalHorarios`, userData, {
+    const response = await axios.post(`${API_URL}/profissionalHorarios`, profissionalHorarios, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -316,6 +316,21 @@ export const getProfissinalHorarioById = async (idProfissional) => {
 export const getAllServices = async () => {
   try {
     const response = await axios.get(`${API_URL}/services`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.response?.data || 'Failed to fetch services');
+  }
+};
+
+export const deleteService = async (id) => {
+  try {
+    const response = await axios.delete(`${API_URL}/services/${id}`, {
       headers: {
         'Content-Type': 'application/json',
       },

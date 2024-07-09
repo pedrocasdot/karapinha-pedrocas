@@ -11,11 +11,11 @@ const GerirContasClientes = () => {
   const [filteredClients, setFilteredClients] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [loading, setLoading] = useState(false); // Loading state
-  const [searchTerm, setSearchTerm] = useState(''); // Search term state
+  const [loading, setLoading] = useState(false); 
+  const [searchTerm, setSearchTerm] = useState(''); 
 
   const handleActivateClient = async (index) => {
-    setLoading(true); // Start loading
+    setLoading(true); 
     const updatedClients = [...filteredClients];
     updatedClients[index].status = true;
     try {
@@ -24,7 +24,7 @@ const GerirContasClientes = () => {
       setModalMessage('A conta do usuário foi ativada/desbloquada com sucesso.');
       setModalIsOpen(true);
       setTimeout(() => setModalIsOpen(false), 3000);
-      // Update the main clients list
+      
       const updatedAllClients = clients.map(c => c.id === client.id ? client : c);
       setClients(updatedAllClients);
       setFilteredClients(updatedClients);
@@ -34,12 +34,12 @@ const GerirContasClientes = () => {
       setTimeout(() => setModalIsOpen(false), 3000);
       console.error('Erro ao ativar a conta do usuário:', error);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false); 
     }
   };
 
   const handleBlockClient = async (index) => {
-    setLoading(true); // Start loading
+    setLoading(true); 
     const updatedClients = [...filteredClients];
     updatedClients[index].status = false;
     try {
@@ -48,7 +48,7 @@ const GerirContasClientes = () => {
       setModalMessage('A conta do usuário foi bloqueada/desativada com sucesso.');
       setModalIsOpen(true);
       setTimeout(() => setModalIsOpen(false), 3000);
-      // Update the main clients list
+      
       const updatedAllClients = clients.map(c => c.id === client.id ? client : c);
       setClients(updatedAllClients);
       setFilteredClients(updatedClients);
@@ -58,7 +58,7 @@ const GerirContasClientes = () => {
       setModalIsOpen(true);
       setTimeout(() => setModalIsOpen(false), 3000);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false); 
     }
   };
 

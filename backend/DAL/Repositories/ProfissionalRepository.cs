@@ -28,11 +28,21 @@ namespace backend.DAL.Repositories
             return profissional;
         }
 
-        public async Task CreateProfissionalAsync(Profissional profissional)
+        public async Task<Profissional> CreateProfissionalAsync(Profissional profissional)
         {
             _context.Profissionals.Add(profissional);
             await _context.SaveChangesAsync();
+            return profissional;
         }
+
+
+        public async Task<Profissional> GetProfissionalByBIAsync(string BI)
+        {
+            var profissional = await _context.Profissionals
+                        .FirstOrDefaultAsync(profissional => profissional.BI == BI);
+            return profissional;
+        }
+
 
         public async Task UpdateProfissionalAsync(Profissional profissional)
         {
@@ -40,6 +50,7 @@ namespace backend.DAL.Repositories
             await _context.SaveChangesAsync();
         }
 
+    
         public async Task DeleteProfissionalAsync(int id)
         {
             var profissional = await _context.Profissionals.FindAsync(id) ?? throw new KeyNotFoundException($"Profissional with ID {id} not found.");

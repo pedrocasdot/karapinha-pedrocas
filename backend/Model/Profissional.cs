@@ -36,6 +36,7 @@ namespace backend.Model
         [ForeignKey("CategoryId")]
         public Category Category { get; set; }
 
+        public bool? Status { get; set; } = true;
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
         public ICollection<ProfissionalHorario> ProfissionalHorarios { get; set; } = new List<ProfissionalHorario>();
     }

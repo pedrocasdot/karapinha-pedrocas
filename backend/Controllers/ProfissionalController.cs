@@ -25,10 +25,21 @@ namespace backend.Controllers
             return Ok(profissionals);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<ActionResult<ProfissionalDTO>> GetProfissional(int id)
         {
             var profissional = await _profissionalService.GetProfissionalByIdAsync(id);
+            if (profissional == null)
+            {
+                return NotFound();
+            }
+            return Ok(profissional);
+        }
+
+        [HttpGet("byBI/{BI}")]
+        public async Task<ActionResult<ProfissionalDTO>> GetProfissionalByBI(string BI)
+        {
+            var profissional = await _profissionalService.GetProfissionalByBIAsync(BI);
             if (profissional == null)
             {
                 return NotFound();
@@ -40,10 +51,17 @@ namespace backend.Controllers
         public async Task<ActionResult> CreateProfissional(ProfissionalDTO profissionalDto)
         {
             await _profissionalService.CreateProfissionalAsync(profissionalDto);
-            return CreatedAtAction(nameof(GetProfissional), new { id = profissionalDto.Id }, profissionalDto);
+            var profissional = await _profissionalService.GetProfissionalByBIAsync(profissionalDto.BI);
+
+            if (profissional == null)
+            {
+                return NotFound();
+            }
+
+            return CreatedAtAction(nameof(GetProfissional), new { id = profissional.Id }, profissional);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<ActionResult> UpdateProfissional(int id, ProfissionalDTO profissionalDto)
         {
             if (id != profissionalDto.Id)
@@ -55,7 +73,7 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteProfissional(int id)
         {
             var profissional = await _profissionalService.GetProfissionalByIdAsync(id);

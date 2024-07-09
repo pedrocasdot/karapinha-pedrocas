@@ -88,24 +88,25 @@ const DashboardAdmin = () => {
     };
 
     return (
-        <div className="flex justify-center items-center">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 p-6  mx-auto">
-                <div data-aos="fade-up" className="bg-white p-6 rounded-lg shadow-lg">
+        <div className="flex justify-center items-center p-6 mx-auto">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 w-full">
+                <div data-aos="fade-up" className="bg-white p-6 rounded-lg shadow-lg w-full h-96">
                     <h2 className="text-xl font-bold mb-2">Faturamento</h2>
-                    <div className="h-64">
+                    <div className="w-full h-full">
                         <Bar data={revenueData} options={{ maintainAspectRatio: false }} />
                     </div>
                 </div>
 
-                <div data-aos="fade-up" data-aos-delay="200" className="bg-white p-6 rounded-lg shadow-lg">
+                <div data-aos="fade-up" data-aos-delay="200" className="bg-white p-6 rounded-lg shadow-lg w-full h-96">
                     <h3 className="text-xl font-bold mb-2">Serviço Mais e Menos Solicitados</h3>
-                    <div className="h-64">
+                    <div className="w-full h-full">
                         <Pie data={serviceData} options={{ maintainAspectRatio: false }} />
                     </div>
                 </div>
-                <div data-aos="fade-up" data-aos-delay="300" className="bg-white p-6 rounded-lg shadow-lg col-span-1 md:col-span-2 lg:col-span-1">
+
+                <div data-aos="fade-up" data-aos-delay="300" className="bg-white p-6 rounded-lg shadow-lg w-full h-96 col-span-1 md:col-span-2 lg:col-span-2">
                     <h2 className="text-xl font-bold mb-2">Top 5 Profissionais</h2>
-                    <div className="h-64">
+                    <div className="w-full h-full">
                         <Bar data={professionalsData} options={{ maintainAspectRatio: false }} />
                     </div>
                 </div>

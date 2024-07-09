@@ -10,7 +10,8 @@ namespace backend.Shared.Repositories
     {
         Task<IEnumerable<Profissional>> GetAllProfissionalsAsync();
         Task<Profissional> GetProfissionalByIdAsync(int id);
-        Task CreateProfissionalAsync(Profissional user);
+        Task<Profissional> CreateProfissionalAsync(Profissional user);
+        Task<Profissional> GetProfissionalByBIAsync(string BI);
         Task UpdateProfissionalAsync(Profissional user);
         Task DeleteProfissionalAsync(int id);
     }

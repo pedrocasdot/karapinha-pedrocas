@@ -27,6 +27,8 @@ namespace backend.DTO
         [RegularExpression(@"^\d{8}[A-Z]{2}\d{3}$", ErrorMessage = "O BI deve seguir o formato: 8 dígitos, 2 letras maiúsculas, 3 dígitos.")]
         public string? BI { get; set; }
 
+        public bool? Status { get; set; }
+
         [Required(ErrorMessage = "O email é obrigatório.")]
         [StringLength(100, ErrorMessage = "O email deve ter no máximo 100 caracteres.")]
         [EmailAddress(ErrorMessage = "O email deve ser um endereço de email válido.")]

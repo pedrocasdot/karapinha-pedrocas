@@ -87,6 +87,13 @@ namespace backend.Services
             if (appointmentDate.Date == DateTime.Today && appointmentTime < DateTime.Now.TimeOfDay)
                 throw new ValidationException("A hora do agendamento não pode ser uma hora passada.");
 
+            
+            var appointments  = await _appointmentRepository.GetAllAppointmentsAsync();
+            var found  = appointments.Any(x => x.AppointmentDate == appointment.AppointmentDate && x.Time == appointment.Time && x.ProfissionalId == appointment.ProfissionalId);
+            if (found){
+                throw new ValidationException("O profissional já está ocupado neste horário.");
+            }
+
             var entity = new Appointment
             {
                 Time = appointment.Time,

@@ -128,6 +128,15 @@ const Marcacao = () => {
 
   };
 
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const currentDate = `${year}-${month}-${day}`;
+    console.log('Current date:', currentDate); // Lo
+    return currentDate;
+  };
   const handleDateChange = (e) => {
     setDate(e.target.value);
   };
@@ -387,18 +396,7 @@ const Marcacao = () => {
           </div>
         )}
 
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="data">
-            Data
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="data"
-            type="date"
-            onChange={handleDateChange}
-            value={date}
-          />
-        </div>
+      
 
         {professional && (
           <div className="mb-4">
@@ -418,6 +416,19 @@ const Marcacao = () => {
             </select>
           </div>
         )}
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="data">
+            Data
+          </label>
+          <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="data"
+            type="date"
+            onChange={handleDateChange}
+            value={date}
+            min={getCurrentDate()}
+          />
+        </div>
 
         <div className="flex items-center justify-center">
           <button

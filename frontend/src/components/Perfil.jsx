@@ -1,9 +1,12 @@
 import React, { useState, useContext } from 'react';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { UserContext } from '../services/UserContext'; // Importa o UserContext
+import { FiEye, FiEyeOff, FiCheckCircle, FiAlertCircle, FiUser } from 'react-icons/fi';
+import { UserContext } from '../services/UserContext';
 import { updateUser } from '../services/apiService';
 import Modal from 'react-modal';
 import { customStyles } from '../services/custom';
+import sobre from '../assets/images/about-1.jpg';
+
+import 'tailwindcss/tailwind.css'; // Import Tailwind CSS
 
 Modal.setAppElement('#root');
 
@@ -26,6 +29,7 @@ const UserProfileForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+  const [modalSuccess, setModalSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -67,10 +71,12 @@ const UserProfileForm = () => {
         });
         await updateUser(userData);
         setModalMessage('Dados atualizados com sucesso');
+        setModalSuccess(true);
         setModalIsOpen(true);
         setTimeout(() => setModalIsOpen(false), 3000);
       } catch (error) {
         setModalMessage('Erro ao atualizar perfil');
+        setModalSuccess(false);
         setModalIsOpen(true);
         setTimeout(() => setModalIsOpen(false), 3000);
       }
@@ -78,104 +84,108 @@ const UserProfileForm = () => {
   };
 
   return (
-    <div className="container flex justify-center items-center min-h-screen">
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-
+    <div className="container flex justify-center items-center bg-gray-100  rounded-lg " style={{ backgroundImage: `url(${sobre})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+     <h1 className="text-2xl font-bold text-white"><FiUser size={70} /></h1>
+     
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-10 w-full  p-12 bg-white rounded-lg shadow-lg"
+      >
         {previewImage && (
-          <div className="col-span-1 md:col-span-2 flex justify-center">
+          <div className="col-span-1 lg:col-span-2 flex justify-center">
             <img
               src={previewImage}
               alt="Preview"
-              className="max-h-48 w-48 rounded-full object-cover mb-4"
+              className="max-h-64 w-64 rounded-full object-cover mb-6 border-2 border-gray-200"
             />
           </div>
         )}
 
         <div className="w-full">
-          <label className="block text-black text-sm font-bold mb-2">Nome Completo</label>
+          <label className="block text-gray-700 text-lg font-bold mb-2">Nome Completo</label>
           <input
             type="text"
             name="nomeCompleto"
             value={formData.nomeCompleto}
             onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="transition duration-500 ease-in-out transform hover:scale-105 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Nome Completo"
           />
           {errors.nomeCompleto && <p className="text-red-500 text-xs italic">{errors.nomeCompleto}</p>}
         </div>
 
         <div className="w-full">
-          <label className="block text-black text-sm font-bold mb-2">Endereço de Email</label>
+          <label className="block text-gray-700 text-lg font-bold mb-2">Endereço de Email</label>
           <input
             type="email"
             name="enderecoEmail"
             value={formData.enderecoEmail}
             onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="transition duration-500 ease-in-out transform hover:scale-105 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Email"
           />
           {errors.enderecoEmail && <p className="text-red-500 text-xs italic">{errors.enderecoEmail}</p>}
         </div>
 
         <div className="w-full">
-          <label className="block text-black text-sm font-bold mb-2">Telemóvel</label>
+          <label className="block text-gray-700 text-lg font-bold mb-2">Telemóvel</label>
           <input
             type="text"
             name="telemovel"
             value={formData.telemovel}
             onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="transition duration-500 ease-in-out transform hover:scale-105 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Telemóvel"
           />
           {errors.telemovel && <p className="text-red-500 text-xs italic">{errors.telemovel}</p>}
         </div>
 
         <div className="w-full">
-          <label className="block text-black text-sm font-bold mb-2">Foto</label>
+          <label className="block text-gray-700 text-lg font-bold mb-2">Foto</label>
           <input
             type="file"
             name="foto"
             onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-white leading-tight focus:outline-none focus:shadow-outline"
+            className="transition duration-500 ease-in-out transform hover:scale-105 shadow appearance-none border rounded w-full py-3 px-4 text-white leading-tight focus:outline-none focus:shadow-outline"
           />
           {errors.foto && <p className="text-red-500 text-xs italic">{errors.foto}</p>}
         </div>
 
         <div className="w-full">
-          <label className="block text-black text-sm font-bold mb-2">Bilhete de Identidade</label>
+          <label className="block text-gray-700 text-lg font-bold mb-2">Bilhete de Identidade</label>
           <input
             type="text"
             name="bi"
             value={formData.bi}
             onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="transition duration-500 ease-in-out transform hover:scale-105 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Bilhete de Identidade"
           />
           {errors.bi && <p className="text-red-500 text-xs italic">{errors.bi}</p>}
         </div>
 
         <div className="w-full">
-          <label className="block text-black text-sm font-bold mb-2">Username</label>
+          <label className="block text-gray-700 text-lg font-bold mb-2">Username</label>
           <input
             type="text"
             name="username"
             value={formData.username}
             onChange={handleChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="transition duration-500 ease-in-out transform hover:scale-105 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Username"
           />
           {errors.username && <p className="text-red-500 text-xs italic">{errors.username}</p>}
         </div>
 
         <div className="w-full">
-          <label className="block text-black text-sm font-bold mb-2">Password</label>
+          <label className="block text-gray-700 text-lg font-bold mb-2">Nova Palavra-passe</label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="transition duration-500 ease-in-out transform hover:scale-105 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               placeholder="Password"
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
@@ -196,14 +206,14 @@ const UserProfileForm = () => {
         </div>
 
         <div className="w-full">
-          <label className="block text-black text-sm font-bold mb-2">Confirmação da Password</label>
+          <label className="block text-gray-700 text-lg font-bold mb-2">Confirmar Nova Palavra-passe</label>
           <div className="relative">
             <input
               type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="transition duration-500 ease-in-out transform hover:scale-105 shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               placeholder="Confirmação da Password"
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
@@ -226,21 +236,25 @@ const UserProfileForm = () => {
         <div className="col-span-2 flex items-center justify-center">
           <button
             type="submit"
-            className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="transition duration-500 ease-in-out transform hover:scale-105 bg-custombrown hover:bg-custombrown1 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline"
           >
-            Salvar
+            Salvar Dados
           </button>
         </div>
-
       </form>
 
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
         style={customStyles}
-        contentLabel="Example Modal"
+        contentLabel="Modal de Feedback"
       >
         <div className="text-center">
+          {modalSuccess ? (
+            <FiCheckCircle className="text-green-500 w-16 h-16 mx-auto mb-4" />
+          ) : (
+            <FiAlertCircle className="text-red-500 w-16 h-16 mx-auto mb-4" />
+          )}
           <p>{modalMessage}</p>
         </div>
       </Modal>

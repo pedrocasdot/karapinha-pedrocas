@@ -11,8 +11,7 @@ namespace backend.Services
     public class ProfissionalService : IProfissionalService
     {
         private readonly IProfissionalsRepository _profissionalsRepository;
-         private readonly ICategoryService _categoryService;
-
+        private readonly ICategoryService _categoryService;
 
         public ProfissionalService(IProfissionalsRepository profissionalsRepository, ICategoryService categoryService)
         {
@@ -32,6 +31,7 @@ namespace backend.Services
                 Category = _categoryService.GetCategoryByIdAsync((int)p.CategoryId).Result,
                 BI = p.BI,
                 Email = p.Email,
+                Status = p.Status
             });
         }
 
@@ -50,10 +50,11 @@ namespace backend.Services
                 Category = _categoryService.GetCategoryByIdAsync((int)profissional.CategoryId).Result,
                 BI = profissional.BI,
                 Email = profissional.Email,
+                Status = profissional.Status,
             };
         }
 
-        public async Task CreateProfissionalAsync(ProfissionalDTO profissionalDto)
+        public async Task<ProfissionalDTO> CreateProfissionalAsync(ProfissionalDTO profissionalDto)
         {
             var entity = new Profissional
             {
@@ -62,9 +63,22 @@ namespace backend.Services
                 CategoryId = profissionalDto.CategoryId,
                 BI = profissionalDto.BI,
                 Email = profissionalDto.Email,
+                Status  = true,
             };
 
-            await _profissionalsRepository.CreateProfissionalAsync(entity);
+            var profissional =  await _profissionalsRepository.CreateProfissionalAsync(entity);
+            
+            return new ProfissionalDTO
+            {
+                Id = profissional.Id,
+                Nome = profissional.Nome,
+                Telemovel = profissional.Telemovel,
+                CategoryId = profissional.CategoryId,
+                Category = _categoryService.GetCategoryByIdAsync((int)profissional.CategoryId).Result,
+                BI = profissional.BI,
+                Email = profissional.Email,
+                Status = profissional.Status,
+            };
         }
 
         public async Task UpdateProfissionalAsync(ProfissionalDTO profissionalDto)
@@ -78,6 +92,7 @@ namespace backend.Services
             entity.CategoryId = profissionalDto.CategoryId;
             entity.BI = profissionalDto.BI;
             entity.Email = profissionalDto.Email;
+            entity.Status = profissionalDto.Status;
 
             await _profissionalsRepository.UpdateProfissionalAsync(entity);
         }
@@ -85,6 +100,22 @@ namespace backend.Services
         public async Task DeleteProfissionalAsync(int id)
         {
             await _profissionalsRepository.DeleteProfissionalAsync(id);
+        }
+
+        public async Task<ProfissionalDTO> GetProfissionalByBIAsync(string BI)
+        {
+           var profissional = await _profissionalsRepository.GetProfissionalByBIAsync(BI);
+            return new ProfissionalDTO
+            {
+                Id = profissional.Id,
+                Nome = profissional.Nome,
+                Telemovel = profissional.Telemovel,
+                CategoryId = profissional.CategoryId,
+                Category = _categoryService.GetCategoryByIdAsync((int)profissional.CategoryId).Result,
+                BI = profissional.BI,
+                Email = profissional.Email,
+                Status = profissional.Status,
+            };
         }
     }
 }

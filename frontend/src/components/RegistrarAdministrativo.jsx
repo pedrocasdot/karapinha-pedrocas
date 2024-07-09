@@ -67,12 +67,39 @@ const RegistrarAdministrativo = () => {
         setModalMessage('A conta do administrativo foi registrada com sucesso!');
         setModalIsOpen(true);
         setTimeout(() => setModalIsOpen(false), 3000);
-        sendEmail(response);
+        setFormData({
+          nomeCompleto: '',
+          bi: '',
+          username: '',
+          foto: '',
+          password: '',
+          confirmPassword: '',
+          telemovel: '',
+          enderecoEmail: '',
+          status: false,
+          tipoUsuario: 2,
+        });
+        setPreviewImage(null);
+        setShowPassword(false);
+        setShowConfirmPassword(false);
       } catch (error) {
-        console.error('Erro ao criar a conta:', error.message);
-        setModalMessage('Erro ao criar a conta, por favor tente novamente');
+        console.error('Erro ao registrar:', error);
+        let errorMessage = 'Erro ao criar a conta, por favor tente novamente';
+
+
+        if (error.errors && typeof error.errors === 'object') {
+          errorMessage = Object.entries(error.errors)
+            .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+            .join('\n');
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        setModalMessage(errorMessage);
         setModalIsOpen(true);
-        setTimeout(() => setModalIsOpen(false), 3000);
+        setTimeout(() => setModalIsOpen(false), 8000);
+
       }
     }
   };

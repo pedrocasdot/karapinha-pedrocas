@@ -8,7 +8,7 @@ namespace backend.DAL
     {
         public ApplicationDBContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
         {
-
+            
         }
 
         public DbSet<User> Users { get; set; }
@@ -22,22 +22,54 @@ namespace backend.DAL
         {
             base.OnModelCreating(modelBuilder);
 
+             modelBuilder.Entity<Category>()
+                .HasIndex(u => u.Name).IsUnique();
+
+            modelBuilder.Entity<Service>()
+                .HasIndex(u => u.ServiceName).IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.EnderecoEmail).IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Username).IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.BI).IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Telemovel).IsUnique();
+
+            modelBuilder.Entity<User>()
+               .HasIndex(u => u.EnderecoEmail).IsUnique();
+
+            modelBuilder.Entity<Profissional>()
+                .HasIndex(u => u.BI).IsUnique();
+
+            modelBuilder.Entity<Profissional>()
+                .HasIndex(u => u.BI).IsUnique();
+
+            
+
+            modelBuilder.Entity<Profissional>()
+                .HasIndex(u => u.Telemovel).IsUnique();
+
             modelBuilder.Entity<User>()
                 .Property(u => u.Username)
                 .IsRequired()
                 .HasMaxLength(50);
-            
+
             modelBuilder.Entity<User>()
                 .Property(u => u.Password)
                 .IsRequired()
                 .HasMaxLength(100);
 
 
-           modelBuilder.Entity<User>()
-                .Property(u => u.EnderecoEmail)
-                .IsRequired()
-                .HasMaxLength(100);
-                
+            modelBuilder.Entity<User>()
+                 .Property(u => u.EnderecoEmail)
+                 .IsRequired()
+                 .HasMaxLength(100);
+
             modelBuilder.Entity<User>()
                 .Property(u => u.BI)
                 .IsRequired()
@@ -61,21 +93,21 @@ namespace backend.DAL
                 .WithMany(c => c.Services)
                 .HasForeignKey(s => s.CategoryId);
 
-             modelBuilder.Entity<User>()
-                .Property(u => u.Telemovel)
-                .IsRequired()
-                .HasMaxLength(9)
-                .HasAnnotation("RegularExpression", @"^\d{9}$");
-            
-             modelBuilder.Entity<ProfissionalHorario>()
-                    .Property(e => e.horario)
-                    .IsRequired()
-                    .HasMaxLength(5)
-                    .HasConversion(
-                        v => v,
-                        v => v)
-                    .HasColumnType("varchar(5)")
-                    .HasAnnotation("RegularExpression", @"^(09:00|09:30|10:00|10:30|11:00|11:30|12:00|12:30|13:00|13:30|14:00|14:30|15:00|15:30|16:00|16:30|17:00|17:30|18:00|18:30|19:00|19:30)$");
+            modelBuilder.Entity<User>()
+               .Property(u => u.Telemovel)
+               .IsRequired()
+               .HasMaxLength(9)
+               .HasAnnotation("RegularExpression", @"^\d{9}$");
+
+            modelBuilder.Entity<ProfissionalHorario>()
+                   .Property(e => e.horario)
+                   .IsRequired()
+                   .HasMaxLength(5)
+                   .HasConversion(
+                       v => v,
+                       v => v)
+                   .HasColumnType("varchar(5)")
+                   .HasAnnotation("RegularExpression", @"^(09:00|09:30|10:00|10:30|11:00|11:30|12:00|12:30|13:00|13:30|14:00|14:30|15:00|15:30|16:00|16:30|17:00|17:30|18:00|18:30|19:00|19:30)$");
 
 
             modelBuilder.Entity<Appointment>()

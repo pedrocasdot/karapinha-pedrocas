@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { getAllCategories, registerCategory, registerService, getAllServices } from '../services/apiService';
+import { getAllCategories, registerCategory, registerService, getAllServices, deleteService } from '../services/apiService';
 import AddCategoryModal from './AddCategoryModal'; // Importando o modal criado
+import Modal from 'react-modal';
 
+import { customStyles } from '../services/custom';
+
+
+
+Modal.setAppElement('#root');
 const GerirServicos = () => {
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
@@ -9,6 +15,9 @@ const GerirServicos = () => {
   const [price, setPrice] = useState('');
   const [services, setServices] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalIsOpen1, setModalOpen1] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+
 
   useEffect(() => {
     async function fetchCategories() {
@@ -23,7 +32,12 @@ const GerirServicos = () => {
     async function fetchServices() {
       try {
         const servicesFromApi = await getAllServices();
-        setServices(servicesFromApi);
+        servicesFromApi.forEach(element => {
+          if (element.status == true) {
+            setServices([...services, element]);
+          }
+        });
+
       } catch (error) {
         console.error('Erro ao buscar serviços:', error);
       }
@@ -58,14 +72,32 @@ const GerirServicos = () => {
       setName('');
       setCategory('');
       setPrice('');
+      setModalMessage('Serviço adicionando com sucesso');
+      setModalOpen1(true);
+      setTimeout(() => setModalOpen1(false), 3000);
     } catch (error) {
       console.log(error);
+      setModalMessage('Não foi possível adicionar o serviço');
+      setModalOpen1(true);
+      setTimeout(() => setModalOpen1(false), 3000);
     }
   };
 
-  const handleDeleteService = (index) => {
-    const updatedServices = services.filter((service, i) => i !== index);
-    setServices(updatedServices);
+  const handleDeleteService = async (id) => {
+
+    try {
+      await deleteService(id);
+      setModalMessage('Serviço adicionando com sucesso');
+      setModalOpen1(true);
+      setTimeout(() => setModalOpen1(false), 3000);
+      const updatedServices = services.filter((service, i) => service.id !== id);
+      setServices(updatedServices);
+    } catch (error) {
+      console.log(error);
+      setModalMessage('Falha ao adicionar o serviço');
+      modalIsOpen1(true);
+      setTimeout(() => setModalOpen1(false), 3000);
+    }
   };
 
   const openModal = () => {
@@ -111,7 +143,7 @@ const GerirServicos = () => {
                   <td className="px-4 py-2 whitespace-nowrap">{service.price}</td>
                   <td className="px-4 py-2 whitespace-nowrap">
                     <button
-                      onClick={() => handleDeleteService(index)}
+                      onClick={() => handleDeleteService(service.id)}
                       className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded focus:outline-none focus:shadow-outline mr-2"
                     >
                       Excluir
@@ -195,6 +227,14 @@ const GerirServicos = () => {
             addCategory={addCategory}
           />
         )}
+        <Modal
+          isOpen={modalIsOpen1}
+          onRequestClose={() => setModalIsOpen1(false)}
+          style={customStyles}
+          contentLabel="Mensagem do Sistema"
+        >
+          <div>{modalMessage}</div>
+        </Modal>
       </div>
     </div>
   );

@@ -4,7 +4,12 @@ import Modal from 'react-modal';
 import 'react-datepicker/dist/react-datepicker.css';
 import { registerLocale, setDefaultLocale } from 'react-datepicker';
 import pt from 'date-fns/locale/pt';
-import { getAllCategories, getAllProfessionals, registerProfissinal, deleteProfissional, getProfissinalHorarioById } from '../services/apiService';
+import {
+  getAllCategories, getAllProfessionals, registerProfissinal, deleteProfissional, getProfissinalHorarioById,
+  registerProfissinalHorario
+
+
+} from '../services/apiService';
 import { customStyles } from '../services/custom';
 
 registerLocale('pt', pt);
@@ -25,24 +30,36 @@ const GerirProfissionais = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [selectedProfessionalSchedules, setSelectedProfessionalSchedules] = useState([]);
 
+  const [errors, setErrors] = useState({
+    name: '',
+    category: '',
+    email: '',
+    idCard: '',
+    phone: '',
+  });
   const handleNameChange = (e) => {
     setName(e.target.value);
+    setErrors({ ...errors, name: e.target.value ? '' : 'Campo obrigatório' });
   };
-
+  
   const handleCategoryChange = (e) => {
     setCategory(e.target.value);
+    setErrors({ ...errors, category: e.target.value ? '' : 'Selecione uma categoria' });
   };
-
+  
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
+    setErrors({ ...errors, email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value) ? '' : 'Email inválido' });
   };
-
+  
   const handleIdCardChange = (e) => {
     setIdCard(e.target.value);
+    setErrors({ ...errors, idCard: e.target.value ? '' : 'Campo obrigatório' });
   };
-
+  
   const handlePhoneChange = (e) => {
     setPhone(e.target.value);
+    setErrors({ ...errors, phone: /^\d+$/.test(e.target.value) ? '' : 'Apenas números permitidos' });
   };
 
   const handleScheduleChange = (index, date) => {
@@ -98,6 +115,13 @@ const GerirProfissionais = () => {
   }, []);
 
   const handleAddProfessional = async () => {
+    
+    if (!name || !category || !email || !idCard || !phone) {
+      setModalMessage('Preencha todos os campos obrigatórios');
+      setModalIsOpen(true);
+      setTimeout(() => setModalIsOpen(false), 3000);
+      return;
+    }
     let newProfessional = {
       nome: name,
       categoryId: categories.find(cat => cat.name.toLowerCase() === category.toLowerCase()).id,
@@ -107,16 +131,10 @@ const GerirProfissionais = () => {
     };
 
     try {
-      await registerProfissinal(newProfessional);
-      const prof = {
-        nome: name,
-        categoryId: newProfessional.categoryId,
-        email: email,
-        telemovel: phone,
-        bi: idCard,
-      };
-
-      setProfessionals([...professionals, prof]);
+      var proifissionalCreated = await registerProfissinal(newProfessional);
+      console.log(proifissionalCreated);
+      cadastrarHorarios(proifissionalCreated.id);
+      setProfessionals([...professionals, proifissionalCreated]);
 
       setName('');
       setCategory('');
@@ -124,9 +142,28 @@ const GerirProfissionais = () => {
       setIdCard('');
       setPhone('');
       setSchedules([null]);
+      setModalMessage("Profissional foi adicionado com sucesso!");
+      setModalIsOpen(true);
+      setTimeout(() => setModalIsOpen(false), 3000);
     } catch (error) {
       console.error('Erro ao adicionar profissional:', error);
+      
+      setModalMessage("Algum erro ocorreu ao adicionar o profissional, verifique bem os dados!");
+      setModalIsOpen(true);
+      setTimeout(() => setModalIsOpen(false), 3000);
     }
+  };
+
+  const cadastrarHorarios = (id) => {
+      schedules.forEach( async (value, index) => {
+          console.log(value);
+          const date = new Date(value);
+          const formattedTime = date.toLocaleTimeString('pt-BR', {
+              hour: '2-digit',
+              minute: '2-digit',
+          });
+          await registerProfissinalHorario({profissionalId: id, horario: formattedTime});
+      });
   };
 
   const handleDeleteProfessional = async (id) => {
@@ -236,6 +273,7 @@ const GerirProfissionais = () => {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                   />
+                  {errors.name && <p className="text-red-500 text-xs italic">{errors.name}</p>}
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">Categoria:</label>
@@ -250,6 +288,7 @@ const GerirProfissionais = () => {
                       <option key={category.id} value={category.name}>{category.name}</option>
                     ))}
                   </select>
+                  {errors.category && <p className="text-red-500 text-xs italic">{errors.category}</p>}
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2">Email:</label>
@@ -260,6 +299,7 @@ const GerirProfissionais = () => {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                   />
+                  {errors.email && <p className="text-red-500 text-xs italic">{errors.email}</p>}
                 </div>
               </form>
             </div>
@@ -273,6 +313,7 @@ const GerirProfissionais = () => {
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
                 />
+                {errors.idCard && <p className="text-red-500 text-xs italic">{errors.idCard}</p>}
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Telemóvel:</label>
@@ -283,6 +324,7 @@ const GerirProfissionais = () => {
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
                 />
+                {errors.phone && <p className="text-red-500 text-xs italic">{errors.phone}</p>}
               </div>
               <div className="mb-6">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Horários:</label>

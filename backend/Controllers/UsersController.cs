@@ -166,7 +166,9 @@ namespace backend.Controllers
         public async Task<ActionResult> CreateUser(UserDTO user)
         {
             await _userService.CreateUserAsync(user);
-            var body = $"""
+            if (user.TipoUsuario == 0)
+            {
+                var body = $"""
 
              <html>
                     <body>
@@ -195,7 +197,7 @@ namespace backend.Controllers
                 </html>
             <html>
             """;
-            var bodyUser = $"""
+                var bodyUser = $"""
 
              <html>
                     <body>
@@ -225,9 +227,47 @@ namespace backend.Controllers
             <html>
             """;
 
-            await EmailService.SendEmail(user.EnderecoEmail, "Bem vindo KARAPINHA XPTO", bodyUser);
-            await EmailService.SendEmail(_configuration.GetSection("Constants:FromEmail").Value, "NOVO USUÁRIO", body);
+                await EmailService.SendEmail(user.EnderecoEmail, "Bem vindo KARAPINHA XPTO", bodyUser);
+                await EmailService.SendEmail(_configuration.GetSection("Constants:FromEmail").Value, "NOVO USUÁRIO", body);
+            }
+            else
+            {
+                var bodyUser = $"""
 
+             <html>
+                    <body>
+                                 <h2>Olá Administrativo, sua conta foi criada</h2>
+                                 <h2>É obrigratório alterar os dados antes do primeiro login</h2>
+                                 <p>Informações da conta:</p>
+                                 <table>
+                                 <tr>
+                                 <th style="border: 1px solid #dddddd; padding: 8px;">Nome</th>
+                                 <td style="border: 1px solid #dddddd; padding: 8px;">{user.NomeCompleto}</td>
+                                 </tr>
+                                 <tr>
+                                 <th style="border: 1px solid #dddddd; padding: 8px;">Email</th>
+                                 <td style="border: 1px solid #dddddd; padding: 8px;">{user.EnderecoEmail}</td>
+                                 </tr>
+                                 <tr>
+                                 <th style="border: 1px solid #dddddd; padding: 8px;">Username</th>
+                                 <td style="border: 1px solid #dddddd; padding: 8px;">{user.Username}</td>
+                                 </tr>
+                                 <tr>
+                                 <th style="border: 1px solid #dddddd; padding: 8px;">Telemovel</th>
+                                 <td style="border: 1px solid #dddddd; padding: 8px;">{user.Telemovel}</td>
+                                 </tr>
+                                  <tr>
+                                 <th style="border: 1px solid #dddddd; padding: 8px;">Palavra-Passe</th>
+                                 <td style="border: 1px solid #dddddd; padding: 8px;">{user.Password}</td>
+                                 </tr>
+                                 </table>
+
+                    </body>
+                </html>
+            <html>
+            """;
+                await EmailService.SendEmail(user.EnderecoEmail, "Conta de Administrativo Criada", bodyUser);
+            }
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 

@@ -3,9 +3,14 @@ import { Bar, Pie } from 'react-chartjs-2';
 import 'chart.js/auto';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import { servicosSolicitados, top5Professionals, faturamento } from '../services/apiService';
+import { Circles } from 'react-loader-spinner';
 
 const DashboardAdmin = () => {
     const [dashboardData, setDashboardData] = useState(null);
+    const [servicos, setServices] = useState([]);
+    const [topProfissionais, setTopProfissionais] = useState([]);
+    const [loading, setLoading] = useState(true); // Adicione um estado de carregamento
 
     useEffect(() => {
         AOS.init({
@@ -15,29 +20,51 @@ const DashboardAdmin = () => {
             delay: 100,
         });
 
-        // Simulando a chamada da API com dados fictícios
         const fetchData = async () => {
-            const mockData = {
-                todayRevenue: 1000,
-                yesterdayRevenue: 900,
-                currentMonthRevenue: 20000,
-                lastMonthRevenue: 18000,
-                mostRequestedService: 'Corte de Cabelo',
-                leastRequestedService: 'Pintura de Unhas',
-                top5Professionals: [
-                    { name: 'Celita Domingos', requests: 45 },
-                    { name: 'Luena Pedro', requests: 40 },
-                    { name: 'Angelo Pedro', requests: 38 },
-                    { name: 'Haxi Pedro', requests: 35 },
-                    { name: 'Adilson Pedro', requests: 30 },
-                ],
-            };
+            try {
+                const services = await servicosSolicitados();
+                const topProfessionals = await top5Professionals();
+                const faturamentoKarapinha = await faturamento();
+                setServices(services);
+                setTopProfissionais(topProfessionals);
+                console.log(topProfessionals);
+                
+                const mockData = {
+                    todayRevenue: faturamentoKarapinha[0].valor,
+                    yesterdayRevenue: faturamentoKarapinha[1].valor,
+                    currentMonthRevenue: faturamentoKarapinha[2].valor,
+                    lastMonthRevenue: faturamentoKarapinha[3].valor,
+                    mostRequestedService: services[0],
+                    leastRequestedService: services[1],
+                    top5Professionals: topProfessionals
+                };
 
-            setDashboardData(mockData);
+                setDashboardData(mockData);
+            } catch (error) {
+                console.error('Failed to fetch data', error);
+            } finally {
+                setLoading(false); // Defina o carregamento como falso após a conclusão
+            }
         };
 
         fetchData();
     }, []);
+
+    if (loading) { // Exiba o spinner enquanto estiver carregando
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <Circles 
+                    height="100"
+                    width="100"
+                    color="#4fa94d"
+                    ariaLabel="circles-loading"
+                    wrapperStyle={{}}
+                    wrapperClass=""
+                    visible={true}
+                />
+            </div>
+        );
+    }
 
     if (!dashboardData) {
         return <p>Loading...</p>;
@@ -60,22 +87,22 @@ const DashboardAdmin = () => {
     };
 
     const serviceData = {
-        labels: ['Escovinho Cheio', 'Manicure'],
+        labels: [dashboardData.mostRequestedService.service.serviceName, dashboardData.leastRequestedService.service.serviceName],
         datasets: [
             {
                 label: 'Marcações',
-                data: [20, 10],
+                data: [dashboardData.mostRequestedService.solicitacoes, dashboardData.leastRequestedService.solicitacoes],
                 backgroundColor: ['#2196f3', '#f44336'],
             },
         ],
     };
 
     const professionalsData = {
-        labels: dashboardData.top5Professionals.map((prof) => prof.name),
+        labels: topProfissionais.map((prof) => prof.profissional.nome),
         datasets: [
             {
                 label: 'Solicitações',
-                data: dashboardData.top5Professionals.map((prof) => prof.requests),
+                data: topProfissionais.map((prof) => prof.solicitacoes),
                 backgroundColor: [
                     '#ff6384',
                     '#36a2eb',

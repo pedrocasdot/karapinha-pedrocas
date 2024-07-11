@@ -122,6 +122,13 @@ const GerirProfissionais = () => {
       setTimeout(() => setModalIsOpen(false), 3000);
       return;
     }
+
+    if(schedules.length == 0 || (schedules.length > 0 && !schedules[0])){
+      setModalMessage('Adicione pelo menos um horário ao profissional');
+      setModalIsOpen(true);
+      setTimeout(() => setModalIsOpen(false), 3000);
+      return;
+    }
     let newProfessional = {
       nome: name,
       categoryId: categories.find(cat => cat.name.toLowerCase() === category.toLowerCase()).id,
@@ -175,7 +182,7 @@ const GerirProfissionais = () => {
       setModalIsOpen(true);
       setTimeout(() => setModalIsOpen(false), 3000);
     } catch (error) {
-      setModalMessage("Não foi possível deletar o profissional o profissional");
+      setModalMessage("Não foi possível deletar o profissional");
       setModalIsOpen(true);
       setTimeout(() => setModalIsOpen(false), 3000);
       console.error('Erro ao deletar profissional:', error);
@@ -249,11 +256,7 @@ const GerirProfissionais = () => {
                         >
                           Excluir
                         </button>
-                        <button
-                          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                        >
-                          Editar
-                        </button>
+                       
                       </td>
                     </tr>
                   ))}

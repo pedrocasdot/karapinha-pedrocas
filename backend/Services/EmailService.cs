@@ -15,8 +15,6 @@ namespace backend.Services
             Configuration = configuration;
         }
 
-
-
         public async Task SendEmail(string toEmail, string subject, string body)
         {
             var fromEmail = Configuration.GetSection("Constants:FromEmail").Value ?? string.Empty;

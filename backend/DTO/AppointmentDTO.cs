@@ -21,6 +21,8 @@ namespace backend.DTO
 
         public bool? Status {get; set;}
 
+        public bool? Reschedule {get; set;}
+
         public String? Time { get; set; }
         public String? AppointmentDate { get; set; }
     }

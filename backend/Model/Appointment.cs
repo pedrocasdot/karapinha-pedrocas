@@ -33,6 +33,8 @@ namespace backend.Model
         [Required(ErrorMessage = "O status é obrigatório.")]
         public bool? Status { get; set; } = false;
 
+        public bool? Reschedule {get; set; } = false;
+
         // [Required(ErrorMessage = "O ID do usuário é obrigatório.")]
         public int? UserId { get; set; }
 

@@ -7,7 +7,7 @@ import sobre from '../assets/images/about-1.jpg';
 import Perfil from './Perfil';
 
 const Dashboard = () => {
-  const [currentPage, setCurrentPage] = useState(null);
+  const [currentPage, setCurrentPage] = useState('marcacao');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext);

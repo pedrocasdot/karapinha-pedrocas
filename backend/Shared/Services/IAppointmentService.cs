@@ -9,4 +9,8 @@ public interface IAppointmentService
     Task CreateAppointmentAsync(AppointmentDTO appointment);
     Task UpdateAppointmentAsync(AppointmentDTO appointment);
     Task DeleteAppointmentAsync(int id);
+    Task<IEnumerable<ServicosSolicatacoesDTO>> GetServicoMaisMenosSolicitadoAsync();
+
+    Task<IEnumerable<FaturamentoDTO>> GetFaturamentoAsync();
+    Task<IEnumerable<ProfissionalSolicitacoesDTO>> GetTop5ProfissionaisAsync();
 }

@@ -4,10 +4,8 @@ import AddCategoryModal from './AddCategoryModal'; // Importando o modal criado
 import Modal from 'react-modal';
 
 import { customStyles } from '../services/custom';
-
-
-
 Modal.setAppElement('#root');
+
 const GerirServicos = () => {
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
@@ -17,7 +15,6 @@ const GerirServicos = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalIsOpen1, setModalOpen1] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-
 
   useEffect(() => {
     async function fetchCategories() {
@@ -32,12 +29,7 @@ const GerirServicos = () => {
     async function fetchServices() {
       try {
         const servicesFromApi = await getAllServices();
-        servicesFromApi.forEach(element => {
-          if (element.status == true) {
-            setServices([...services, element]);
-          }
-        });
-
+        setServices(servicesFromApi);
       } catch (error) {
         console.error('Erro ao buscar serviços:', error);
       }
@@ -56,23 +48,39 @@ const GerirServicos = () => {
   };
 
   const handlePriceChange = (e) => {
-    setPrice(e.target.value);
+    if (/^\d*\.?\d*$/.test(e.target.value)) {
+      setPrice(e.target.value);
+    }
   };
 
   const handleAddService = async () => {
+    if (!name || !category || !price) {
+      setModalMessage('Todos os campos são obrigatórios');
+      setModalOpen1(true);
+      setTimeout(() => setModalOpen1(false), 3000);
+      return;
+    }
+
+    if (isNaN(price) || Number(price) <= 0) {
+      setModalMessage('O preço deve ser um número válido e maior que zero');
+      setModalOpen1(true);
+      setTimeout(() => setModalOpen1(false), 3000);
+      return;
+    }
+
     try {
       const newServiceObject = {
         serviceName: name,
         categoryId: categories.find(cat => cat.name.toLowerCase() === category.toLowerCase()).id,
-        price: price,
+        price: Number(price), 
         status: true
       };
-      await registerService(newServiceObject);
-      setServices([...services, { name, category, price }]);
+      const novoServico = await registerService(newServiceObject);
+      setServices([...services, novoServico]);
       setName('');
       setCategory('');
       setPrice('');
-      setModalMessage('Serviço adicionando com sucesso');
+      setModalMessage('Serviço adicionado com sucesso');
       setModalOpen1(true);
       setTimeout(() => setModalOpen1(false), 3000);
     } catch (error) {
@@ -84,18 +92,17 @@ const GerirServicos = () => {
   };
 
   const handleDeleteService = async (id) => {
-
     try {
       await deleteService(id);
-      setModalMessage('Serviço adicionando com sucesso');
+      setModalMessage('Serviço excluído com sucesso');
       setModalOpen1(true);
       setTimeout(() => setModalOpen1(false), 3000);
       const updatedServices = services.filter((service, i) => service.id !== id);
       setServices(updatedServices);
     } catch (error) {
       console.log(error);
-      setModalMessage('Falha ao adicionar o serviço');
-      modalIsOpen1(true);
+      setModalMessage('Falha ao excluir o serviço');
+      setModalOpen1(true);
       setTimeout(() => setModalOpen1(false), 3000);
     }
   };
@@ -207,6 +214,11 @@ const GerirServicos = () => {
                 onChange={handlePriceChange}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 required
+                onKeyPress={(e) => {
+                  if (!/^\d*\.?\d*$/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
               />
             </div>
           </div>
@@ -229,11 +241,11 @@ const GerirServicos = () => {
         )}
         <Modal
           isOpen={modalIsOpen1}
-          onRequestClose={() => setModalIsOpen1(false)}
+          onRequestClose={() => setModalOpen1(false)}
+          contentLabel="Mensagem"
           style={customStyles}
-          contentLabel="Mensagem do Sistema"
         >
-          <div>{modalMessage}</div>
+          <div className="text-lg font-bold">{modalMessage}</div>
         </Modal>
       </div>
     </div>

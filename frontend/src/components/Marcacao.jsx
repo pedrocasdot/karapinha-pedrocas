@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import jsPDF from 'jspdf';
-import TimePicker from 'react-time-picker'; // 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import TimePicker from 'react-time-picker';
 import Modal from 'react-modal';
 import logo from '../assets/images/logo.png';
 import { UserContext } from '../services/UserContext';
@@ -8,9 +10,13 @@ import { customStyles } from '../services/custom';
 import {
   getAllProfessionals, getAllCategories, getAllServices, getProfissionalById,
   registerAppointment, getCategoryById, getAllAppointments,
-  getServiceById, deleteAppointment, getProfissinalHorarioById
+  getServiceById, deleteAppointment, getProfissinalHorarioById, confirmarReagendamento
 } from '../services/apiService';
 import { FaShoppingCart } from 'react-icons/fa';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import InvoicePDF from './MyDocument';
+import 'jspdf-autotable'; 
+import ClipLoader from 'react-spinners/ClipLoader';
 
 Modal.setAppElement('#root');
 
@@ -27,15 +33,17 @@ const Marcacao = () => {
   const [categories, setCategories] = useState([]);
   const [professionals, setProfessionals] = useState([]);
   const [horarios, setHorarios] = useState([]);
-  const [cart, setCart] = useState([]); // Estado do carrinho
+  const [cart, setCart] = useState([]); 
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
 
-  const [isCartOpen, setIsCartOpen] = useState(false); // Estado do carrinho expandido
-  const cartRef = useRef(null); // Referência para o carrinho
+  const [isCartOpen, setIsCartOpen] = useState(false); 
+  const cartRef = useRef(null); 
 
   const { user } = useContext(UserContext);
+
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     async function fetchCategories() {
@@ -50,41 +58,20 @@ const Marcacao = () => {
     async function fetchMarcacoes() {
       try {
         const marcacoesFromApi = await getAllAppointments();
-        marcacoesFromApi.map(async (marcacao) => {
-          const prof = await getProfissionalById(marcacao.profissionalId);
-          const serv = await getServiceById(marcacao.serviceId);
-          const cat = await getCategoryById(serv.categoryId);
-
-          const marcacao_ = {
-            id: marcacao.id,
-            category: cat.name,
-            service: serv.serviceName,
-            professional: prof.nome,
-            date: marcacao.appointmentDate,
-            time: marcacao.time,
-            price: serv.price,
-            user: user
-          };
-
-          const isConflict = bookings.some(
-            booking =>
-              booking.date === marcacao_.date &&
-              booking.time === marcacao_.time
-          );
-
-
-          if (!isConflict && user.id === marcacao.userId) {
-            setBookings([...bookings, marcacao_])
-          }
-        });
+        const userMarcacoesPendentes = marcacoesFromApi.filter(marcacao => marcacao.userId === user.id && marcacao.status === false);
+        setBookings(userMarcacoesPendentes);
       } catch (error) {
-        console.error('Erro ao buscar categorias:', error);
+        console.error('Erro ao buscar marcacoes:', error);
+      } finally {
+        setLoading(false); 
       }
     }
 
     fetchMarcacoes();
     fetchCategories();
-  }, []);
+  }, [user.id]);
+
+
 
   const handleCategoryChange = async (e) => {
     const selectedCategory = e.target.value;
@@ -120,12 +107,10 @@ const Marcacao = () => {
     const getHorarioProfissional = async () => {
       const horariosFromApi = await getProfissinalHorarioById(selectedProfessional.id);
       setHorarios(horariosFromApi);
-      console.log(horarios);
     }
 
     getHorarioProfissional();
     setProfessional(e.target.value);
-
   };
 
   const getCurrentDate = () => {
@@ -134,9 +119,9 @@ const Marcacao = () => {
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     const currentDate = `${year}-${month}-${day}`;
-    console.log('Current date:', currentDate); // Lo
     return currentDate;
   };
+
   const handleDateChange = (e) => {
     setDate(e.target.value);
   };
@@ -146,55 +131,51 @@ const Marcacao = () => {
   };
 
   const handleGeneratePDF = (bookings) => {
-    const doc = new jsPDF('p', 'mm', 'a4');
-    let totalPrice = 0;
+    const doc = new jsPDF();
+    let yOffset = 10;
 
-    // Adicionar logo e nome da empresa
-    const logoImg = new Image();
-    logoImg.src = logo;
-    doc.addImage(logoImg, 'PNG', 10, 10, 40, 40);
-    doc.setFontSize(18);
-    doc.text('KARAPINHA XPTO', 60, 30);
 
-    // Adicionar título da fatura
-    doc.setFontSize(16);
-    doc.text('Fatura de Agendamentos', 10, 50);
+    const img = new Image();
+    img.src = logo;
+    doc.addImage(img, 'PNG', 15, 10, 30, 30);
 
-    // Adicionar detalhes da reserva
-    bookings.forEach((booking, index) => {
-      const y = 70 + (index * 20); // Espaçamento entre os itens
-      doc.setFontSize(14);
-      doc.text(`Categoria: ${booking.category}`, 10, y);
-      doc.text(`Serviço: ${booking.service}`, 10, y + 10);
-      doc.text(`Profissional: ${booking.professional}`, 10, y + 20);
-      doc.text(`Data: ${booking.date}`, 10, y + 30);
-      doc.text(`Hora: ${booking.time}`, 10, y + 40);
-      doc.text(`Preço: KZ ${booking.price.toFixed(2)}`, 10, y + 50);
-      doc.line(10, y + 55, 200, y + 55); // Linha separadora
-      totalPrice += booking.price;
+    doc.setFontSize(10);
+    doc.text(`Fatura de Agendamentos para ${user.nomeCompleto}`, 55, 25);
+
+    yOffset += 40; // Ajuste a altura conforme necessário
+    // Cabeçalhos da tabela
+    const headers = [['Categoria', 'Serviço', 'Profissional', 'Data', 'Hora', 'Preço']];
+    const data = bookings.map(booking => [
+      booking.category,
+      booking.service,
+      booking.professional,
+      booking.date,
+      booking.time,
+      `KZ ${booking.price.toFixed(2)}`
+    ]);
+
+    
+    doc.autoTable({
+      startY: yOffset,
+      head: headers,
+      body: data,
+      theme: 'grid',
+      styles: { fontSize: 12 },
     });
 
-    // Adicionar preço total
-    const finalY = 70 + (bookings.length * 20) + 10;
-    doc.setFontSize(16);
-    doc.text(`Preço Total: KZ ${totalPrice.toFixed(2)}`, 10, finalY);
+    // Adiciona rodapé opcional
+    const totalPrice = bookings.reduce((total, booking) => total + booking.price, 0);
+    doc.text(`Total: KZ ${totalPrice.toFixed(2)}`, 15, doc.autoTable.previous.finalY + 10);
 
-    // Adicionar detalhes do cliente
-    doc.setFontSize(14);
-    doc.text(`Cliente: ${user.nomeCompleto}`, 10, finalY + 20);
-    doc.text(`Email do Cliente: ${user.enderecoEmail}`, 10, finalY + 30);
-
-    const totalPages = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= totalPages; i++) {
-      doc.setPage(i);
-      doc.setFontSize(10);
-      doc.text(`Página ${i} de ${totalPages}`, doc.internal.pageSize.width - 50, doc.internal.pageSize.height - 10);
-    }
-
+    
     doc.save(`agendamentos-${user.nomeCompleto}.pdf`);
   };
 
   const handleAddToCart = () => {
+    const selectedCategoryObj = categories.find(cat => cat.name.toLowerCase() === category.toLowerCase());
+    const selectedServiceObj = services.find(ser => ser.serviceName.toLowerCase() === service.toLowerCase());
+    const selectedProfessionalObj = professionals.find(prof => prof.nome.toLowerCase() === professional.toLowerCase());
+
     const newBooking = {
       category,
       service,
@@ -202,7 +183,10 @@ const Marcacao = () => {
       date,
       time,
       price,
-      user
+      user,
+      idCategory: selectedCategoryObj ? selectedCategoryObj.id : null,
+      idService: selectedServiceObj ? selectedServiceObj.id : null,
+      idProfissional: selectedProfessionalObj ? selectedProfessionalObj.id : null
     };
 
     const isConflict = cart.some(
@@ -217,10 +201,8 @@ const Marcacao = () => {
       setTimeout(() => setModalIsOpen(false), 3000);
       return;
     }
-    const newBookingExtra = { ...newBooking, idProfissional: 1, idCategory: 1, idService: 1 };
 
-    setCart([...cart, newBookingExtra]);
-
+    setCart([...cart, newBooking]);
     setCategory('');
     setServices([]);
     setProfessional('');
@@ -250,7 +232,25 @@ const Marcacao = () => {
     }
   };
 
+  const handleConfirmarReagendamento = async (index) => {
+    try {
+      await confirmarReagendamento(bookings[index].id);
+      bookings[index].reschedule = false;
+      setBookings(bookings);
+      setModalMessage("A confirmação de reagendamento foi feita com sucesso!");
+      setModalIsOpen(true);
+      setTimeout(() => setModalIsOpen(false), 3000);
+    } catch (error) {
+      console.log(error);
+      setModalMessage("Algum erro aconteceu, não foi possível confirmar o reagendamento!");
+      setModalIsOpen(true);
+      setTimeout(() => setModalIsOpen(false), 3000);
+    }
+  };
+
   const handleFinalizeBooking = async () => {
+    setLoading(true); 
+    setIsCartOpen(false);
     try {
       for (let booking of cart) {
         const newAppointment = {
@@ -263,20 +263,25 @@ const Marcacao = () => {
           userId: user.id
         };
 
-        await registerAppointment(newAppointment);
-        setBookings([...bookings, booking]);
-       
+        const newBooking = await registerAppointment(newAppointment);
+
+        setBookings([...bookings, newBooking]);
       }
-      handleGeneratePDF(bookings);
+
+      handleGeneratePDF(cart); 
       setCart([]);
+      
       setModalMessage('Agendamentos realizados com sucesso!');
       setModalIsOpen(true);
       setTimeout(() => setModalIsOpen(false), 3000);
     } catch (error) {
+      
       console.error('Erro ao registrar as marcações:', error);
       setModalMessage('Erro ao registrar as marcações. Tente novamente.');
       setModalIsOpen(true);
       setTimeout(() => setModalIsOpen(false), 3000);
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -341,154 +346,169 @@ const Marcacao = () => {
       </div>
 
       <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="categoria">
-            Categoria
-          </label>
-          <select
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="categoria"
-            onChange={handleCategoryChange}
-            value={category}
-          >
-            <option value="">Selecione uma categoria</option>
-            {categories.map((category, index) => (
-              <option key={index} value={category.name}>{category.name}</option>
-            ))}
-          </select>
-        </div>
-
-        {services.length > 0 && (
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="servico">
-              Serviço
-            </label>
-            <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="servico"
-              onChange={handleServiceChange}
-              value={service}
-            >
-              <option value="">Selecione um serviço</option>
-              {services.map((service, index) => (
-                <option key={index} value={service.serviceName}>{service.serviceName}</option>
-              ))}
-            </select>
+        {loading ? (
+          <div className="flex justify-center items-center h-48">
+            <ClipLoader color="#4A90E2" loading={loading} size={50} />
           </div>
+        ) : (
+          <>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="categoria">
+                Categoria
+              </label>
+              <select
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="categoria"
+                onChange={handleCategoryChange}
+                value={category}
+              >
+                <option value="">Selecione uma categoria</option>
+                {categories.map((category, index) => (
+                  <option key={index} value={category.name}>{category.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {services.length > 0 && (
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="servico">
+                  Serviço
+                </label>
+                <select
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  id="servico"
+                  onChange={handleServiceChange}
+                  value={service}
+                >
+                  <option value="">Selecione um serviço</option>
+                  {services.map((service, index) => (
+                    <option key={index} value={service.serviceName}>{service.serviceName}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {professionals.length > 0 && (
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="profissional">
+                  Profissional
+                </label>
+                <select
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  id="profissional"
+                  onChange={handleProfessionalChange}
+                  value={professional}
+                >
+                  <option value="">Selecione um profissional</option>
+                  {professionals.map((professional, index) => (
+                    <option key={index} value={professional.nome}>{professional.nome}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {professional && (
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="time">
+                  Hora
+                </label>
+                <select
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  id="time"
+                  onChange={handleTimeChange}
+                  value={time}
+                >
+                  <option value="">Selecione um horário</option>
+                  {horarios.map((horario, index) => (
+                    <option key={index} value={horario}>{horario}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="data">
+                Data
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="data"
+                type="date"
+                onChange={handleDateChange}
+                value={date}
+                min={getCurrentDate()}
+              />
+            </div>
+
+            <div className="flex items-center justify-center">
+              <button
+                onClick={handleAddToCart}
+                className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Agendar
+              </button>
+            </div>
+          </>
         )}
-
-        {professionals.length > 0 && (
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="profissional">
-              Profissional
-            </label>
-            <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="profissional"
-              onChange={handleProfessionalChange}
-              value={professional}
-            >
-              <option value="">Selecione um profissional</option>
-              {professionals.map((professional, index) => (
-                <option key={index} value={professional.nome}>{professional.nome}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-      
-
-        {professional && (
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="time">
-              Hora
-            </label>
-            <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="time"
-              onChange={handleTimeChange}
-              value={time}
-            >
-              <option value="">Selecione um horário</option>
-              {horarios.map((horario, index) => (
-                <option key={index} value={horario}>{horario}</option>
-              ))}
-            </select>
-          </div>
-        )}
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="data">
-            Data
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="data"
-            type="date"
-            onChange={handleDateChange}
-            value={date}
-            min={getCurrentDate()}
-          />
-        </div>
-
-        <div className="flex items-center justify-center">
-          <button
-            onClick={handleAddToCart}
-            className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            Agendar
-          </button>
-        </div>
       </div>
 
-      {bookings.length > 0 && (
-        <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-          <h2 className="text-xl font-bold mb-4">Suas Marcações</h2>
-          <table className="w-full table-auto">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="px-4 py-2">Categoria</th>
-                <th className="px-4 py-2">Serviço</th>
-                <th className="px-4 py-2">Profissional</th>
-                <th className="px-4 py-2">Data</th>
-                <th className="px-4 py-2">Hora</th>
-                <th className="px-4 py-2">Preço</th>
-                <th className="px-4 py-2">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((booking, index) => (
-                <tr key={index} className="text-gray-700">
-                  <td className="border px-4 py-2">{booking.category}</td>
-                  <td className="border px-4 py-2">{booking.service}</td>
-                  <td className="border px-4 py-2">{booking.professional}</td>
-                  <td className="border px-4 py-2">{booking.date}</td>
-                  <td className="border px-4 py-2">{booking.time}</td>
-                  <td className="border px-4 py-2">KZ {booking.price.toFixed(2)}</td>
-                  <td className="border px-4 py-2">
-                    {user && (
-                      <>
-                        <button
-                          onClick={() => handleDeleteBooking(index)}
-                          className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline mr-2"
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          onClick={() => handleGeneratePDF(booking)}
-                          className="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
-                        >
-                          PDF
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h2 className="text-xl font-bold mb-4">Suas Marcações</h2>
+        <table className="w-full table-auto">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="px-4 py-2">Categoria</th>
+              <th className="px-4 py-2">Serviço</th>
+              <th className="px-4 py-2">Profissional</th>
+              <th className="px-4 py-2">Data</th>
+              <th className="px-4 py-2">Hora</th>
+              <th className="px-4 py-2">Preço</th>
+              <th className="px-4 py-2">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bookings.map((booking, index) => (
+              <tr key={index} className="text-gray-700">
+                <td className="border px-4 py-2">{booking.servico.category.name}</td>
+                <td className="border px-4 py-2">{booking.servico.serviceName}</td>
+                <td className="border px-4 py-2">{booking.profissional.nome}</td>
+                <td className="border px-4 py-2">{booking.appointmentDate}</td>
+                <td className="border px-4 py-2">{booking.time}</td>
+                <td className="border px-4 py-2">KZ {booking.servico.price.toFixed(2)}</td>
+                <td className="border px-4 py-2">
+                  {user && booking.reschedule === false ? (
+                    <>
+                      <button
+                        onClick={() => handleDeleteBooking(index)}
+                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline mr-2"
+                      >
+                        Cancelar
+                      </button>
+                    </>
+                  ) : 
+                  <>
+                      <button
+                        onClick={() => handleDeleteBooking(index)}
+                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline mr-2"
+                      >
+                        Cancelar
+                      </button>
 
+                      <button
+                        onClick={() => handleConfirmarReagendamento(index)}
+                        className="bg-custombrown hover:bg-custombrown1 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline mr-2"
+                      >
+                        Confirmar Reagendamento
+                      </button>
+                    </>
+                  
+                  }
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <ToastContainer />
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}

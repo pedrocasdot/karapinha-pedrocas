@@ -14,10 +14,13 @@ namespace backend.Controllers
     public class ServicesController : ControllerBase
     {
         private readonly IServicoService _serviceService;
+        private readonly ICategoryService _serviceCategory;
+        
 
-        public ServicesController(IServicoService serviceService)
+        public ServicesController(IServicoService serviceService, ICategoryService serviceCategory)
         {
             _serviceService = serviceService;
+            _serviceCategory = serviceCategory;
         }
 
         [HttpGet]
@@ -42,6 +45,8 @@ namespace backend.Controllers
         public async Task<ActionResult> CreateService(ServiceDTO service)
         {
             await _serviceService.CreateServiceAsync(service);
+            var category = await _serviceCategory.GetCategoryByIdAsync((int)service.CategoryId);
+            service.Category = category;
             return CreatedAtAction(nameof(GetService), new { id = service.Id }, service);
         }
 

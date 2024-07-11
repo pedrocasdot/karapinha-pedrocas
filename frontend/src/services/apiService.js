@@ -140,6 +140,90 @@ export const deleteAppointment = async (id) => {
   }
 }
 
+export const confirmarMarcacao = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/appointments/confirmarMarcacao/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.response.data);
+  }
+}
+
+export const reangendarMarcacao = async (id, novaData) => {
+  try {
+    const response = await axios.put(`${API_URL}/appointments/reagendarMarcacao/${id}`,novaData, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.response.data);
+  }
+}
+
+export const confirmarReagendamento = async (id) => {
+  try {
+    const response = await axios.put(`${API_URL}/appointments/confirmarReagendamento/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.response.data);
+  }
+}
+export const top5Professionals = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/appointments/top-profissionais`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.response.data);
+  }
+}
+
+export const servicosSolicitados = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/appointments/servico-solicitado`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.response.data);
+  }
+}
+
+export const faturamento = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/appointments/faturamento`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error.response.data);
+  }
+}
+
+
 export const deleteProfissional = async (id) => {
   try {
     const response = await axios.delete(`${API_URL}/profissionals/${id}`, {

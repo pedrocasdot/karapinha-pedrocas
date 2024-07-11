@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../services/UserContext';
 import GerirProfissionais from './GerirProfissinais';
 import GerirServicos from './GerirServicos';
+
 import DashboardAdmin from './DashboardAdmin';
 import ConfirmarMarcacoes from './ConfirmarMarcacoes';
+import ConsultarAgendaMensal from './ConsultarAgendaMensal'; // Importar o novo componente
 import sobre from '../assets/images/whychoose2.jpg';
 import { getAllCategories } from '../services/apiService';
 import AOS from 'aos';
@@ -70,6 +72,12 @@ const Admnistrativo = () => {
             Gerir Marcações
           </button>
           <button
+            onClick={() => handlePageChange('agenda')}
+            className={`block p-4 text-lg focus:bg-gray-700 focus:text-white transition duration-300 ${currentPage === 'agenda' ? 'bg-gray-700 text-white' : 'hover:bg-gray-700'}`}
+          >
+            Consultar Agenda Mensal
+          </button>
+          <button
             onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 mt-4 mx-4 transition duration-300"
           >
@@ -84,6 +92,7 @@ const Admnistrativo = () => {
           {currentPage === 'profissionais' && <GerirProfissionais />}
           {currentPage === 'servicos' && <GerirServicos />}
           {currentPage === 'marcacoes' && <ConfirmarMarcacoes />}
+          {currentPage === 'agenda' && <ConsultarAgendaMensal />}
         </div>
       </div>
     </div>

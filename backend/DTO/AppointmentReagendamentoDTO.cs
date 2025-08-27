@@ -7,6 +7,7 @@ namespace backend.DTO
 {
     public class AppointmentReagendamentoDTO
     {
-        public String AppointmentDate { get; set; }
+        public string AppointmentDate { get; set; }
+        public string Time { get; set; }
     }
 }

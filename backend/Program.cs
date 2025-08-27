@@ -82,12 +82,14 @@ builder.Services.AddAuthentication(options =>
 
 });
 
+
 builder.Services.AddScoped<IUsersRepository, UserRepository>();
 builder.Services.AddScoped<ICategoriesRepository, CategoryRepository>();
 builder.Services.AddScoped<IProfissionalsRepository, ProfissionalRepository>();
 builder.Services.AddScoped<IServicesRepository, ServiceRepository>();
 builder.Services.AddScoped<IProfissionalHorarioRepository, ProfissionalHorarioRepository>();
 builder.Services.AddScoped<IAppointmentsRepository, AppointmentRepository>();
+builder.Services.AddScoped<IAppointmentItemRepository, AppointmentItemRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -96,6 +98,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IServicoService, ServicoService>();
 builder.Services.AddScoped<IProfissionalHorarioService, ProfissionalHorarioService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IAppointmentItemService, AppointmentItemService>();
 builder.Services.AddScoped<EmailService>();
 
 

@@ -23,10 +23,11 @@ namespace backend.DAL.Repositories
             return await _context.Appointments.FindAsync(id);
         }
 
-        public async Task CreateAppointmentAsync(Appointment appointment)
+        public async Task<int> CreateAppointmentAsync(Appointment appointment)
         {
             _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
+            return appointment.Id;
         }
 
         public async Task UpdateAppointmentAsync(Appointment appointment)

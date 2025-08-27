@@ -8,7 +8,7 @@ namespace backend.DAL
     {
         public ApplicationDBContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
         {
-            
+
         }
 
         public DbSet<User> Users { get; set; }
@@ -16,14 +16,16 @@ namespace backend.DAL
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Profissional> Profissionals { get; set; }
+
+        public DbSet<AppointmentItem> AppointmentItems { get; set; }
         public DbSet<ProfissionalHorario> ProfissionalHorarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-             modelBuilder.Entity<Category>()
-                .HasIndex(u => u.Name).IsUnique();
+            modelBuilder.Entity<Category>()
+               .HasIndex(u => u.Name).IsUnique();
 
             modelBuilder.Entity<Service>()
                 .HasIndex(u => u.ServiceName).IsUnique();
@@ -49,7 +51,7 @@ namespace backend.DAL
             modelBuilder.Entity<Profissional>()
                 .HasIndex(u => u.BI).IsUnique();
 
-            
+
 
             modelBuilder.Entity<Profissional>()
                 .HasIndex(u => u.Telemovel).IsUnique();
@@ -110,14 +112,14 @@ namespace backend.DAL
                    .HasAnnotation("RegularExpression", @"^(09:00|09:30|10:00|10:30|11:00|11:30|12:00|12:30|13:00|13:30|14:00|14:30|15:00|15:30|16:00|16:30|17:00|17:30|18:00|18:30|19:00|19:30)$");
 
 
-            modelBuilder.Entity<Appointment>()
+            modelBuilder.Entity<AppointmentItem>()
                 .HasOne(s => s.Service)
-                .WithMany(c => c.Appointments)
+                .WithMany(c => c.AppointmentItem)
                 .HasForeignKey(s => s.ServiceId);
 
-            modelBuilder.Entity<Appointment>()
+            modelBuilder.Entity<AppointmentItem>()
                 .HasOne(s => s.Profissional)
-                .WithMany(c => c.Appointments)
+                .WithMany(c => c.AppointmentItems)
                 .HasForeignKey(s => s.ProfissionalId);
 
             modelBuilder.Entity<Appointment>()
@@ -138,6 +140,12 @@ namespace backend.DAL
             modelBuilder.Entity<Service>()
                 .Property(s => s.Price)
                 .HasPrecision(18, 2);
+
+            modelBuilder.Entity<AppointmentItem>()
+                .HasOne(s => s.Appointment)
+                .WithMany(c => c.appointmentItems)
+                .HasForeignKey(s => s.AppointmentId);
+
 
         }
     }

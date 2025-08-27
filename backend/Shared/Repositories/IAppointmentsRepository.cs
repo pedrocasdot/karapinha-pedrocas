@@ -6,7 +6,7 @@ namespace backend.Shared.Repositories
     {
         Task<IEnumerable<Appointment>> GetAllAppointmentsAsync();
         Task<Appointment> GetAppointmentByIdAsync(int id);
-        Task CreateAppointmentAsync(Appointment appointment);
+        Task<int> CreateAppointmentAsync(Appointment appointment);
         Task UpdateAppointmentAsync(Appointment appointment);
         Task DeleteAppointmentAsync(int id);
     }

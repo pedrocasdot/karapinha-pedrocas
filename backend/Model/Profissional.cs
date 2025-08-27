@@ -37,7 +37,7 @@ namespace backend.Model
         public Category Category { get; set; }
 
         public bool? Status { get; set; } = true;
-        public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+        public ICollection<AppointmentItem> AppointmentItems { get; set; } = new List<AppointmentItem>();
         public ICollection<ProfissionalHorario> ProfissionalHorarios { get; set; } = new List<ProfissionalHorario>();
     }
 }

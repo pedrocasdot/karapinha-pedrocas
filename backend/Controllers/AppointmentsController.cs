@@ -16,6 +16,8 @@ namespace backend.Controllers
     public class AppointmentsController : ControllerBase
     {
         private readonly IAppointmentService _appointmentService;
+
+        private readonly IAppointmentItemService _appointmentItemService;
         private readonly IUserService _userService;
 
         private readonly IServicoService _servicoServico;
@@ -23,16 +25,18 @@ namespace backend.Controllers
         private readonly IProfissionalService _profissionalService;
         
 
-         public EmailService EmailService { get; }
+        public EmailService EmailService { get; }
 
         public AppointmentsController(IAppointmentService appointmentService, IUserService userService,
-         EmailService emailService, IServicoService servicoService, IProfissionalService profissionalService)
+         EmailService emailService, IServicoService servicoService, IProfissionalService profissionalService,
+         IAppointmentItemService appointmentItemService)
         {
             _appointmentService = appointmentService;
             _userService = userService;
             _profissionalService  = profissionalService;
             _servicoServico = servicoService;
             EmailService = emailService;
+            _appointmentItemService = appointmentItemService;
         }
 
         [HttpGet]
@@ -46,6 +50,7 @@ namespace backend.Controllers
         public async Task<ActionResult<AppointmentDTO>> GetAppointment(int id)
         {
             var appointment = await _appointmentService.GetAppointmentByIdAsync(id);
+            
             if (appointment == null)
             {
                 return NotFound();
@@ -54,20 +59,18 @@ namespace backend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateAppointment(AppointmentDTO appointment)
+        public async Task<ActionResult> CreateAppointment(AppointmentAddDTO appointment)
         {
             await _appointmentService.CreateAppointmentAsync(appointment);
             var userEmail  = await _userService.GetUserByIdAsync((int)appointment.UserId);
             appointment.Reschedule = false;
-            appointment.Servico = _servicoServico.GetServiceByIdAsync((int)appointment.ServiceId).Result;
-            appointment.Profissional = _profissionalService.GetProfissionalByIdAsync((int)appointment.ProfissionalId).Result;
             appointment.User = userEmail;
             await EmailService.SendEmail(userEmail.EnderecoEmail, "Confirmação de agendamento", "Seu agendamento foi realizado com sucesso, aguarde pela confirmação!");
             return CreatedAtAction(nameof(GetAppointment), new { id = appointment.Id }, appointment);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAppointment(int id, AppointmentDTO appointment)
+        public async Task<IActionResult> UpdateAppointment(int id, AppointmentUpdateDTO appointment)
         {
 
             if (id != appointment.Id)
@@ -115,7 +118,6 @@ namespace backend.Controllers
             {
                 return BadRequest();
             }
-            appointment.AppointmentDate = reagendamentoDTO.AppointmentDate;
             appointment.Reschedule = true;
             await _appointmentService.UpdateAppointmentAsync(appointment);
             await  EmailService.SendEmail(appointment.User.EnderecoEmail, "Reagendamento de Marcação", GenerateAppointmentEmailBodyReagendamento(appointment));
@@ -172,11 +174,11 @@ namespace backend.Controllers
             sb.Append("<tr><th>Detalhes do reagendamento</th><th>Informações</th></tr>");
             sb.Append($"<tr><td>Nome do Usuário</td><td>{appointment.User.Username}</td></tr>");
             sb.Append($"<tr><td>Email do Usuário</td><td>{appointment.User.EnderecoEmail}</td></tr>");
-            sb.Append($"<tr><td>Serviço</td><td>{appointment.Servico.ServiceName}</td></tr>");
-            sb.Append($"<tr><td>Profissional</td><td>{appointment.Profissional.Nome}</td></tr>");
-            sb.Append($"<tr><td>Data</td><td>{appointment.AppointmentDate}</td></tr>");
-            sb.Append($"<tr><td>Hora</td><td>{appointment.Time}</td></tr>");
-            sb.Append($"<tr><td>Preço</td><td>{appointment.Servico.Price}</td></tr>");
+            // sb.Append($"<tr><td>Serviço</td><td>{appointment.Servico.ServiceName}</td></tr>");
+            // sb.Append($"<tr><td>Profissional</td><td>{appointment.Profissional.Nome}</td></tr>");
+            // sb.Append($"<tr><td>Data</td><td>{appointment.AppointmentDate}</td></tr>");
+            // sb.Append($"<tr><td>Hora</td><td>{appointment.Time}</td></tr>");
+            // sb.Append($"<tr><td>Preço</td><td>{appointment.Servico.Price}</td></tr>");
             sb.Append("</table>");
             sb.Append("<p>Atenciosamente,</p>");
             sb.Append("<p>Karapinha XPTO</p>");
@@ -192,27 +194,27 @@ namespace backend.Controllers
             return NoContent();
         }
 
-        [HttpGet("servico-solicitado")]
-        public async Task<ActionResult<IEnumerable<ServicosSolicatacoesDTO>>> GetServicoMaisMenosSolicitado()
-        {
-            var servicos = await _appointmentService.GetServicoMaisMenosSolicitadoAsync();
+        // [HttpGet("servico-solicitado")]
+        // public async Task<ActionResult<IEnumerable<ServicosSolicatacoesDTO>>> GetServicoMaisMenosSolicitado()
+        // {
+        //     var servicos = await _appointmentService.GetServicoMaisMenosSolicitadoAsync();
             
-            return Ok(servicos);
-        }
+        //     return Ok(servicos);
+        // }
 
-        // Endpoint para os top 5 profissionais com mais solicitações
-        [HttpGet("top-profissionais")]
-        public async Task<ActionResult<IEnumerable<ProfissionalSolicitacoesDTO>>> GetTop5Profissionais()
-        {
-            var topProfissionais = await _appointmentService.GetTop5ProfissionaisAsync();
-            return Ok(topProfissionais);
-        }
+        // // Endpoint para os top 5 profissionais com mais solicitações
+        // [HttpGet("top-profissionais")]
+        // public async Task<ActionResult<IEnumerable<ProfissionalSolicitacoesDTO>>> GetTop5Profissionais()
+        // {
+        //     var topProfissionais = await _appointmentService.GetTop5ProfissionaisAsync();
+        //     return Ok(topProfissionais);
+        // }
 
-        [HttpGet("faturamento")]
-        public async Task<ActionResult<IEnumerable<FaturamentoDTO>>> GetFaturamento()
-        {
-            var faturamento = await _appointmentService.GetFaturamentoAsync();
-            return Ok(faturamento);
-        }
+        // [HttpGet("faturamento")]
+        // public async Task<ActionResult<IEnumerable<FaturamentoDTO>>> GetFaturamento()
+        // {
+        //     var faturamento = await _appointmentService.GetFaturamentoAsync();
+        //     return Ok(faturamento);
+        // }
     }
 }

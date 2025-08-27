@@ -17,9 +17,9 @@ namespace backend.Services
 
         public async Task SendEmail(string toEmail, string subject, string body)
         {
-            var fromEmail = Configuration.GetSection("Constants:FromEmail").Value ?? string.Empty;
-            var fromEmailPassword = Configuration.GetSection("Constants:EmailAccountPassword").Value ?? string.Empty;
-            var fromDisplayName = Configuration.GetSection("Constants:FromDisplayName").Value ?? string.Empty;
+            var fromEmail = "seu email";
+            var fromEmailPassword = "sctecyafrckrwahg";
+            var fromDisplayName = "nome da conta";
 
 
             var message = new MailMessage()

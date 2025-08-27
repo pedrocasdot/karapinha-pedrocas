@@ -25,6 +25,6 @@ namespace backend.Model
         [ForeignKey("CategoryId")]
         public Category Category { get; set; }
 
-        public ICollection<Appointment> Appointments { get; set; }
+        public ICollection<AppointmentItem> AppointmentItem { get; set; }
     }
 }
